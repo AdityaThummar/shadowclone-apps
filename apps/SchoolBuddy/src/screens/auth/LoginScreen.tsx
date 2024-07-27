@@ -1,11 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
-import { BaseText, Header, IconButton, Input } from '../../components';
+import {
+  ScreenWrapper,
+  PrimaryButton,
+  BaseText,
+  Header,
+  IconButton,
+  Input,
+} from '@components';
+import { commonStyles } from '@styles';
 import { ThemeState } from '../../zustand';
-import { ScreenWrapper } from '../../components/micro/screenwrapper';
-import { PrimaryButton } from '../../components/micro/button/primary';
 import { useStyles } from '../../theme';
-import { commonStyles } from '../../styles';
 import { useNav } from '../../hook';
 
 export const LoginScreen = () => {
@@ -21,7 +26,7 @@ export const LoginScreen = () => {
     <ScreenWrapper style={styles.container}>
       <View style={[commonStyles.flex]} />
       <Header
-        title="Login"
+        title='Login'
         disableBack
         sizeHuge={false}
         sizeHugeHeading
@@ -29,19 +34,19 @@ export const LoginScreen = () => {
         style={styles.headerStyle}
       />
       <Input
-        label="Username or Email"
-        placeholder="example@gmail.com"
-        error="Please enter email !!"
+        label='Username or Email'
+        placeholder='example@gmail.com'
+        error='Please enter email !!'
       />
-      <Input label="Password" placeholder="ex. 123aAxxe" isPassword />
+      <Input label='Password' placeholder='ex. 123aAxxe' isPassword />
       <PrimaryButton
-        title="Submit"
+        title='Submit'
         onPress={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         style={styles.buttonStyle}
       />
       <BaseText center>or</BaseText>
       <IconButton
-        name="logo-google"
+        name='logo-google'
         color={colors.primary}
         containerStyle={[
           commonStyles.center,

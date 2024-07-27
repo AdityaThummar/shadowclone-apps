@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@components": [
+        "./packages/components/common/index"
+      ],
+      "@schoolbuddy-component/*": [
+        "./packages/components/school-buddy/*"
+      ],
+      "@paybuddy-component/*": [
+        "./packages/components/pay-buddy/*"
+      ],
+      "@styles": [
+        "./packages/styles/common/index"
+      ],
+    }
+  }
+}

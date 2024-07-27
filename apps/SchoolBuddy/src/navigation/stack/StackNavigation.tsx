@@ -23,9 +23,9 @@ export const StackNavigation = () => {
   );
 
   return (
-    <NStack.Navigator screenOptions={screenOptions} initialRouteName="Login">
-      <NStack.Screen name="Login" component={LoginScreen} />
-      <NStack.Screen name="Signup" component={SignupScreen} />
+    <NStack.Navigator screenOptions={screenOptions} initialRouteName='Login'>
+      <NStack.Screen name='Login' component={LoginScreen} />
+      <NStack.Screen name='Signup' component={SignupScreen} />
     </NStack.Navigator>
   );
 };

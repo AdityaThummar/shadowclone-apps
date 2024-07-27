@@ -1,15 +1,15 @@
 import React from 'react';
+import { View } from 'react-native';
 import {
   BaseText,
   GoogleButton,
   Header,
   Input,
   ScreenWrapper,
-} from '../../components';
-import { commonStyles } from '../../styles';
+  PrimaryButton,
+} from '@components';
+import { commonStyles } from '@styles';
 import { useStyles } from '../../theme';
-import { View } from 'react-native';
-import { PrimaryButton } from '../../components/micro/button/primary';
 import { s as loginStyle } from './LoginScreen';
 
 export const SignupScreen = () => {
@@ -18,7 +18,7 @@ export const SignupScreen = () => {
 
   return (
     <ScreenWrapper style={[loginStyles.container, commonStyles.justifyStart]}>
-      <Header title="Create Account" />
+      <Header title='Create Account' />
       <View style={[commonStyles.itemCenter, styles.informationContainer]}>
         <BaseText sizeBig semibold center>
           Hey there, Happy to have you!!
@@ -27,14 +27,14 @@ export const SignupScreen = () => {
           Please fill these details to create new account
         </BaseText>
       </View>
-      <Input label="Email" placeholder="example@gmail.com" />
-      <Input label="Password" placeholder="ex. 123aAxxe" isPassword />
+      <Input label='Email' placeholder='example@gmail.com' />
+      <Input label='Password' placeholder='ex. 123aAxxe' isPassword />
       <Input
-        label="Confirm Password"
-        placeholder="ex. 123aAxxe"
+        label='Confirm Password'
+        placeholder='ex. 123aAxxe'
         secureTextEntry
       />
-      <PrimaryButton title="Submit" style={[loginStyles.buttonStyle]} />
+      <PrimaryButton title='Submit' style={[loginStyles.buttonStyle]} />
       <BaseText center>or</BaseText>
       <GoogleButton containerStyle={[loginStyles.googleButton]} />
     </ScreenWrapper>
