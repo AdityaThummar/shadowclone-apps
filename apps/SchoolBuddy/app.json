@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "SchoolBuddy",
+    "slug": "SchoolBuddy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shadowclone.SchoolBuddy",
+      "googleServicesFile": "./configs/GoogleService-Info.plist"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.shadowclone.SchoolBuddy",
+      "googleServicesFile": "./configs/google-services.json",
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "13.4",
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/Inter-Regular.ttf",
+            "./src/assets/fonts/Inter-Medium.ttf",
+            "./src/assets/fonts/Inter-SemiBold.ttf",
+            "./src/assets/fonts/Inter-Bold.ttf"
+          ]
+        }
+      ]
+    ]
+  }
+}
