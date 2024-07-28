@@ -11,7 +11,7 @@ import {
   useThemed,
 } from '@components';
 import { commonStyles } from '@styles';
-import { useNav } from '../../navigation/useNav';
+import { useNav } from '../../helper/useNav';
 
 export const LoginScreen = () => {
   const styles = s();

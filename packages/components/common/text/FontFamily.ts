@@ -2,10 +2,10 @@ import { InputProps } from '../Input';
 import { BaseTextProps } from './types';
 
 export const FontFamily = {
-  primaryRegular: 'Inter-Regular',
-  primaryMedium: 'Inter-Medium',
-  primarySemiBold: 'Inter-SemiBold',
-  primaryBold: 'Inter-Bold',
+  primaryRegular: 'primaryRegular',
+  primaryMedium: 'primaryMedium',
+  primarySemiBold: 'primarySemiBold',
+  primaryBold: 'primaryBold',
 };
 
 export const getFontWeight = (props: BaseTextProps | InputProps) => {

@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { StackScreenProps } from './types';
+import { StackScreenProps } from '../navigation/types';
 
 export const useNav = <T extends keyof StackScreenProps>() => {
   type Props = NativeStackScreenProps<StackScreenProps, T>;

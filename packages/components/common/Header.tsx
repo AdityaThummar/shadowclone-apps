@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { BaseText } from './text';
+import { BaseText, BaseTextStyle } from './text';
 import { IconButton } from './button';
 import { BaseTextProps } from './text';
 import { ViewStyles } from '../../types/common/commonTypes';
@@ -12,17 +12,23 @@ export type HeaderProps = {
   containerStyle?: ViewStyles;
   disableBack?: boolean;
   onPressBack?: () => void;
-} & BaseTextProps;
+  style?: BaseTextStyle;
+} & Omit<BaseTextProps, 'style'>;
 
 export const Header = (props: HeaderProps) => {
-  const { goBack } = useNavigation();
   const {
     title,
     containerStyle,
     disableBack = false,
     onPressBack = () => goBack(),
+    style = {},
+    ...textProps
   } = props;
+
   const styles = s();
+
+  const { goBack } = useNavigation();
+
   return (
     <View style={[styles.container, containerStyle]}>
       {!disableBack && (
@@ -33,7 +39,7 @@ export const Header = (props: HeaderProps) => {
           onPress={onPressBack}
         />
       )}
-      <BaseText sizeHuge bold {...props}>
+      <BaseText sizeHuge bold {...textProps} style={[styles.textStyle, style]}>
         {title}
       </BaseText>
     </View>
@@ -57,5 +63,8 @@ const s = () =>
       flexDirection: 'row',
       gap: 10,
       alignItems: 'center',
+    },
+    textStyle: {
+      flex: 1,
     },
   }));

@@ -1,4 +1,9 @@
 export type StackScreenProps = {
-  Login: undefined;
-  Signup: undefined;
+  SocialLogin: undefined;
+  BottomTab: undefined;
+};
+
+export type BottomTabScreenProps = {
+  Home: undefined;
+  Search: undefined;
 };

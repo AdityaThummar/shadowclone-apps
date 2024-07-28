@@ -4,8 +4,10 @@ import {
   NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import { StackScreenProps } from './types';
-import { LoginScreen, SignupScreen } from '../screens/auth';
+import { SocialLoginScreen } from '../screens';
 import { useThemed } from '@components';
+import { BottomTabNavigator } from './BottomTabNavigator';
+import { AuthState } from '../zustand/AuthState';
 
 const NStack = createNativeStackNavigator<StackScreenProps>();
 
@@ -13,6 +15,7 @@ export const StackNavigation = () => {
   const {
     themeValues: { colors },
   } = useThemed();
+  const { user } = AuthState();
 
   const screenOptions: NativeStackNavigationOptions = useMemo(
     () => ({
@@ -25,9 +28,12 @@ export const StackNavigation = () => {
   );
 
   return (
-    <NStack.Navigator screenOptions={screenOptions} initialRouteName='Login'>
-      <NStack.Screen name='Login' component={LoginScreen} />
-      <NStack.Screen name='Signup' component={SignupScreen} />
+    <NStack.Navigator
+      screenOptions={screenOptions}
+      initialRouteName={user?.user?.uid ? 'BottomTab' : 'SocialLogin'}
+    >
+      <NStack.Screen name='SocialLogin' component={SocialLoginScreen} />
+      <NStack.Screen name='BottomTab' component={BottomTabNavigator} />
     </NStack.Navigator>
   );
 };

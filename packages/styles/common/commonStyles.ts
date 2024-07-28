@@ -34,4 +34,9 @@ export const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
+  rowItemCenterJustifyCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

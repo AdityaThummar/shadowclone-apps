@@ -1,1 +1,2 @@
-export * from "./commonStyles";
+export * from './commonStyles';
+export * from './styleFunctions';
