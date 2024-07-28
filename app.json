@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "9f6067d9-b0e2-42d1-a65f-e978648b7275"
+      }
+    },
+    "android": {
+      "package": "com.shadowclone.shadowcloneapps"
+    }
+  }
+}
