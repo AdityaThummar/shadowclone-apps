@@ -25,7 +25,7 @@ export const NotificationsScreen = () => {
   // const NotificationData = [];
 
   const renderUsers = useCallback(() => {
-    return <UserCardHalf isRequest />;
+    return <UserCardHalf actions={[{ title: 'Add' }, { title: 'Remove' }]} />;
   }, []);
 
   const renderPayCard: SectionListRenderItem<

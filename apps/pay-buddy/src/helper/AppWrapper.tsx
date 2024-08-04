@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Platform, PermissionsAndroid } from 'react-native';
 import * as Updates from 'expo-updates';
 import * as Notifications from 'expo-notifications';
+import { useThemed } from '@components';
 
 export const AppWrapper = ({ children }: React.PropsWithChildren) => {
   // const [isUpdaing, setIsUpdaing] = useState(false);

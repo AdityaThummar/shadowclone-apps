@@ -15,7 +15,9 @@ export const Scroll = (props: ScrollProps) => {
       {...props}
       style={[commonStyles.flex, props?.style]}
       contentContainerStyle={[
-        styles.contentContainerStyle,
+        !props?.horizontal
+          ? styles.contentContainerStyle
+          : styles.contentContainerStyleHorizontal,
         props?.contentContainerStyle,
       ]}
     />
@@ -26,5 +28,8 @@ const s = () =>
   themedStyles(() => ({
     contentContainerStyle: {
       paddingBottom: 15,
+    },
+    contentContainerStyleHorizontal: {
+      paddingVertical: 5,
     },
   }));

@@ -8,29 +8,49 @@ import {
   useThemed,
 } from '@components';
 import React from 'react';
+import { useNav } from '../../helper';
 
-export const GroupScreen = () => {
+export type GroupScreenProps = {
+  isSelect?: boolean;
+};
+
+export const GroupScreen = (props: GroupScreenProps) => {
+  const { isSelect = false } = props;
+
   const {
     themeValues: { colors },
   } = useThemed();
 
+  const {
+    navigation: { push },
+  } = useNav();
+
+  const goToAddNew = () => {
+    push('AddEditGroupScreen');
+  };
+
   return (
     <ScreenWrapper>
       <Header
-        title='Groups'
-        disableBack
+        title={isSelect ? 'Select Groups' : 'Groups'}
+        disableBack={!isSelect}
         rightComponent={
-          <IconButton color={colors.tint} name='plus' iFamily='Entypo' />
+          <IconButton
+            color={colors.tint}
+            name='plus'
+            iFamily='Entypo'
+            onPress={goToAddNew}
+          />
         }
       />
       <Input style={{ marginBottom: 10 }} placeholder='Search here ..' />
       <Scroll>
-        <ListItemWithImage />
-        <ListItemWithImage />
-        <ListItemWithImage />
-        <ListItemWithImage />
-        <ListItemWithImage />
-        <ListItemWithImage />
+        <ListItemWithImage isSelection={isSelect} />
+        <ListItemWithImage isSelection={isSelect} selected />
+        <ListItemWithImage isSelection={isSelect} />
+        <ListItemWithImage isSelection={isSelect} />
+        <ListItemWithImage isSelection={isSelect} selected />
+        <ListItemWithImage isSelection={isSelect} />
       </Scroll>
     </ScreenWrapper>
   );

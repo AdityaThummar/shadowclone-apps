@@ -5,6 +5,7 @@ import {
   Header,
   ScreenWrapper,
   themedStyles,
+  useThemed,
 } from '@components';
 import { hp } from '@styles';
 import { login } from '../../api';
@@ -14,6 +15,9 @@ import { Image } from 'react-native';
 
 export const SocialLoginScreen = () => {
   const { screenStyle, googleBtnStyle } = s();
+  const {
+    themeValues: { colors },
+  } = useThemed();
 
   const { setUser } = AuthState();
   const { navigation } = useNav();
@@ -41,13 +45,14 @@ export const SocialLoginScreen = () => {
         Pay Buddy
       </BaseText> */}
       <Image
-        source={require('../../assets/logo/PayBuddy 1024_500.png')}
+        source={require('../../assets/logo/PayBuddy Original Logo.png')}
         style={{
           height: 100,
           width: 200,
           alignSelf: 'center',
         }}
         resizeMode='contain'
+        tintColor={colors.secondary}
       />
       <Header disableBack title='Sign in' center />
       <BaseText medium center>

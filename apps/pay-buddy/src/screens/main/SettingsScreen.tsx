@@ -72,10 +72,14 @@ export const SettingsScreen = () => {
     );
   };
 
+  const goToEditProfile = () => {
+    navigation.navigate('EditProfileScreen');
+  };
+
   return (
     <ScreenWrapper>
       <Header title='Settings' disableBack />
-      <Card>
+      {/* <Card>
         <BaseText semibold center>
           {`All these are just a skeleton components that we will develop in upmost version, For now just know and enjoy this demo app we allow you to access.Thank you for using this App 🙂`}
         </BaseText>
@@ -89,7 +93,8 @@ export const SettingsScreen = () => {
         <BaseText semibold center>
           {`You can logout by pressing on below "Logout" button`}
         </BaseText>
-      </Card>
+      </Card> */}
+      <PrimaryButton title='Edit Account' onPress={goToEditProfile} />
       <PrimaryButton title='Switch Theme' onPress={toggleTheme} />
       <PrimaryButton title='Delete Account' onPress={confirmDelete} />
       <PrimaryButton title='Logout' onPress={initLogout} />

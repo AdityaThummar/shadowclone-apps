@@ -4,6 +4,7 @@ import {
   Card,
   IconButton,
   PayRequestCard,
+  PlusButton,
   ScreenWrapper,
   TabItemType,
   themedStyles,
@@ -18,6 +19,7 @@ import {
   View,
 } from 'react-native';
 import { commonStyles } from '@styles';
+import { useNav } from '../../helper';
 
 export const showInProgress = () => {
   Alert.alert(
@@ -41,6 +43,9 @@ export const HomeScreen = () => {
   const {
     themeValues: { colors },
   } = useThemed();
+  const {
+    navigation: { navigate },
+  } = useNav();
 
   const styles = s();
 
@@ -72,8 +77,12 @@ export const HomeScreen = () => {
     [styles],
   );
 
+  const goToAddNew = () => {
+    navigate('AddEditRequestScreen');
+  };
+
   return (
-    <ScreenWrapper style={[{ margin: 0, backgroundColor: 'white' }]}>
+    <ScreenWrapper style={[{ margin: 0, backgroundColor: colors.primary }]}>
       <View style={[commonStyles.rowItemsCenter, styles.topContainer]}>
         <TopTabs
           tabs={Tabs}
@@ -81,20 +90,17 @@ export const HomeScreen = () => {
           onPressTab={setSelectedTab}
           style={[commonStyles.flex]}
         />
-        <IconButton
-          name='plus'
-          iFamily='Entypo'
+        <PlusButton
           containerStyle={[{ marginRight: 20 }]}
-          color={colors.tint}
-          onPress={showInProgress}
+          onPress={goToAddNew}
         />
       </View>
       <ScreenWrapper style={{ marginTop: 0 }}>
-        <Card>
+        {/* <Card>
           <BaseText semibold center>
             {`All these are just a skeleton components that we will develop in upmost version, For now just know and enjoy this demo app we allow you to access.Thank you for using this App 🙂`}
           </BaseText>
-        </Card>
+        </Card> */}
         {/* <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 5 }}

@@ -1,3 +1,5 @@
+import * as NavigationBar from 'expo-navigation-bar';
+import { Platform, PermissionsAndroid } from 'react-native';
 import { create } from 'zustand';
 import { persist, PersistOptions } from 'zustand/middleware';
 import { configureStorage } from './ZustandHelpers';
@@ -34,15 +36,26 @@ export const configureThemeState = (resources: ResourceType) =>
   create(
     persist<ThemeStateType>(
       (set: (props: ThemeStateType) => void, get: () => ThemeStateType) => {
+        const BottomNavBarSetter = async (theme: ThemeType = 'light') => {
+          if (Platform.OS === 'android') {
+            await NavigationBar.setBackgroundColorAsync(
+              resources?.[theme].primary ?? 'transparent',
+            );
+            await NavigationBar.setButtonStyleAsync(theme);
+          }
+        };
+
         return {
           colors: resources.light,
           theme: 'light',
-          setTheme: (t: ThemeType) =>
+          setTheme: (t: ThemeType) => {
             set({
               ...get(),
               theme: t,
               colors: resources[t],
-            }),
+            });
+            BottomNavBarSetter(t);
+          },
         };
       },
       configureStorage('Theme') as PersistOptions<

@@ -17,12 +17,12 @@ export const TextButton = (props: TextButtonProps) => {
       onPress={onPress}
     >
       <BaseText
+        bold
+        sizeRegular
         {...textProps}
         style={[styles.text, textProps?.style ?? {}]}
-        bold
-        sizeMedium
       >
-        {title}
+        {title?.toUpperCase()}
       </BaseText>
     </Touchable>
   );

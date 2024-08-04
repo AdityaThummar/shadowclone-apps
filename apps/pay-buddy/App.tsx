@@ -3,7 +3,6 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import * as NavigationBar from 'expo-navigation-bar';
 import { EntryPoint } from './src/navigation';
 import {
   InterBold,
@@ -12,15 +11,9 @@ import {
   InterSemiBold,
 } from './src/assets';
 import { EXPO_PROJECT_ID } from './configs/expoConfigs';
+import { useThemed } from '@components';
 
 SplashScreen.preventAutoHideAsync();
-
-export const BottomNavBarSetter = async () => {
-  if (Platform.OS === 'android') {
-    await NavigationBar.setBackgroundColorAsync('white');
-    await NavigationBar.setButtonStyleAsync('dark');
-  }
-};
 
 const App = () => {
   const [loaded, error] = useFonts({
@@ -59,10 +52,6 @@ const App = () => {
       console.log('errorerrorerrorerror', error);
     }
   }, [loaded, error]);
-
-  useEffect(() => {
-    BottomNavBarSetter();
-  }, []);
 
   return <EntryPoint />;
 };
