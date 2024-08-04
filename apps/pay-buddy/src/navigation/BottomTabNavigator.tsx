@@ -50,10 +50,7 @@ export const BottomTabNavigator = () => {
   );
 
   return (
-    <BottomTab.Navigator
-      screenOptions={screenOptions}
-      initialRouteName='Notifications'
-    >
+    <BottomTab.Navigator screenOptions={screenOptions} initialRouteName='Home'>
       <BottomTab.Screen
         name='Home'
         options={{
@@ -61,7 +58,7 @@ export const BottomTabNavigator = () => {
         }}
         component={HomeScreen}
       />
-      <BottomTab.Screen
+      {/* <BottomTab.Screen
         name='Groups'
         options={{
           tabBarIcon: renderTabIcon.bind(this, 'people'),
@@ -81,7 +78,7 @@ export const BottomTabNavigator = () => {
           tabBarIcon: renderTabIcon.bind(this, 'notifications'),
         }}
         component={NotificationsScreen}
-      />
+      /> */}
       <BottomTab.Screen
         name='Settings'
         options={{

@@ -94,3 +94,20 @@ export const logout: () => Promise<ResponseType> = async () => {
     };
   }
 };
+
+export const deleteUserAccount: () => Promise<ResponseType> = async () => {
+  try {
+    const firebaseResponse = await auth().currentUser?.delete();
+    console.log('🚀 ~ deleteUserAccount ~ firebaseResponse:', firebaseResponse);
+    return {
+      success: true,
+      data: {},
+    };
+  } catch (error) {
+    console.log('🚀 ~ deleteUserAccount ~ error:', error);
+    return {
+      success: false,
+      error: 'no_reason',
+    };
+  }
+};

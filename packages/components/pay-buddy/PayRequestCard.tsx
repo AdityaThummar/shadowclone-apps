@@ -5,6 +5,7 @@ import { commonStyles } from '@styles';
 import { Divider } from '../common/Divider';
 import { ViewStyles } from '@types';
 import { PayRequestItemType } from 'apps/pay-buddy/src/api/payRequests';
+import { showInProgress } from 'apps/pay-buddy/src/screens';
 
 export type PayRequestCardProps = {
   containerStyle?: ViewStyles;
@@ -27,6 +28,7 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
         isPaid || allPaid ? styles.completedStyle : {},
         containerStyle,
       ]}
+      onPress={showInProgress}
     >
       <View style={[commonStyles.rowItemsCenter, styles.topContainer]}>
         <Image
@@ -101,11 +103,13 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
               ) : (
                 <>
                   <TextButton
+                    onPress={showInProgress}
                     containerStyle={commonStyles.flex}
                     title='2 Paid'
                   />
                   <Divider vertical />
                   <TextButton
+                    onPress={showInProgress}
                     containerStyle={commonStyles.flex}
                     style={styles.remainingMemberButonColor}
                     title='3 Remaining'
@@ -115,11 +119,13 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
             ) : (
               <>
                 <TextButton
+                  onPress={showInProgress}
                   containerStyle={commonStyles.flex}
                   title='Mark as Paid'
                 />
                 <Divider vertical />
                 <TextButton
+                  onPress={showInProgress}
                   containerStyle={commonStyles.flex}
                   title='Pay Now'
                 />

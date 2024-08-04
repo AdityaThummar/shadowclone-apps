@@ -15,6 +15,13 @@
         "buildType": "apk"
       }
     },
+    "play": {
+      "distribution": "internal",
+      "channel": "playst",
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "production": {
       "channel": "production"
     }

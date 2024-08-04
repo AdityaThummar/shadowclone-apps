@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   BaseText,
+  Card,
   IconButton,
   PayRequestCard,
   ScreenWrapper,
@@ -10,12 +11,20 @@ import {
   useThemed,
 } from '@components';
 import {
+  Alert,
   SectionList,
   SectionListData,
   SectionListRenderItem,
   View,
 } from 'react-native';
 import { commonStyles } from '@styles';
+
+export const showInProgress = () => {
+  Alert.alert(
+    'In Development',
+    'This feature is in development, You will be seeing soon in upnext versions',
+  );
+};
 
 const Tabs: TabItemType[] = [
   { name: 'Pending' },
@@ -77,9 +86,15 @@ export const HomeScreen = () => {
           iFamily='Entypo'
           containerStyle={[{ marginRight: 20 }]}
           color={colors.tint}
+          onPress={showInProgress}
         />
       </View>
       <ScreenWrapper style={{ marginTop: 0 }}>
+        <Card>
+          <BaseText semibold center>
+            {`All these are just a skeleton components that we will develop in upmost version, For now just know and enjoy this demo app we allow you to access.Thank you for using this App 🙂`}
+          </BaseText>
+        </Card>
         {/* <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 5 }}

@@ -10,6 +10,7 @@ import { hp } from '@styles';
 import { login } from '../../api';
 import { AuthState } from '../../zustand/AuthState';
 import { useNav } from '../../helper';
+import { Image } from 'react-native';
 
 export const SocialLoginScreen = () => {
   const { screenStyle, googleBtnStyle } = s();
@@ -20,6 +21,7 @@ export const SocialLoginScreen = () => {
   const googleLogin = async () => {
     console.log('logged');
     const response = await login();
+    console.log('🚀 ~ googleLogin ~ response:', response);
     if (response?.success && response?.data) {
       setUser(response?.data);
       navigation.reset({
@@ -35,9 +37,18 @@ export const SocialLoginScreen = () => {
 
   return (
     <ScreenWrapper style={screenStyle}>
-      <BaseText center sizeHugeHeading bold>
+      {/* <BaseText center sizeHugeHeading bold>
         Pay Buddy
-      </BaseText>
+      </BaseText> */}
+      <Image
+        source={require('../../assets/logo/PayBuddy 1024_500.png')}
+        style={{
+          height: 100,
+          width: 200,
+          alignSelf: 'center',
+        }}
+        resizeMode='contain'
+      />
       <Header disableBack title='Sign in' center />
       <BaseText medium center>
         {`For extra security and app's integrity, Pay Buddy will only accessible via Google sign-in`}

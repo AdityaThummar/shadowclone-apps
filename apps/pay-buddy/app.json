@@ -2,7 +2,7 @@
   "expo": {
     "name": "pay-buddy",
     "slug": "pay-buddy",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,6 +17,7 @@
       "googleServicesFile": "./configs/pay-buddy-ios-google-service.plist"
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
