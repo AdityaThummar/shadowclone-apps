@@ -40,8 +40,7 @@ export const SocialLoginScreen = () => {
       </BaseText>
       <Header disableBack title='Sign in' center />
       <BaseText medium center>
-        For extra security and app's integrity, Pay Buddy will only accessible
-        via Google sign-in
+        {`For extra security and app's integrity, Pay Buddy will only accessible via Google sign-in`}
       </BaseText>
       <GoogleButton
         big

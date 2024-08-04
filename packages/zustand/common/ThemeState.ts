@@ -13,6 +13,10 @@ export type ThemeColorsType = {
   inputFocusTint?: string;
   inputPlaceHolder?: string;
   googleBlue?: string;
+  screenBackground?: string;
+  dividerColor?: string;
+  cardBackgroundColor?: string;
+  completedCardBackground?: string;
 };
 
 export type ResourceType = {

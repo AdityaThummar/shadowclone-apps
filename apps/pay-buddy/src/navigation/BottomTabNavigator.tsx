@@ -1,11 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native';
 import React, { useCallback, useMemo } from 'react';
 import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import { BottomTabScreenProps } from './types';
-import { HomeScreen, SearchScreen } from '../screens';
+import {
+  GroupScreen,
+  HomeScreen,
+  NotificationsScreen,
+  SearchScreen,
+  SettingsScreen,
+} from '../screens';
 import { BaseIcon, useThemed } from '@components';
 
 const BottomTab = createBottomTabNavigator<BottomTabScreenProps>();
@@ -22,6 +27,10 @@ export const BottomTabNavigator = () => {
       },
       headerShown: false,
       tabBarShowLabel: false,
+      tabBarStyle: {
+        backgroundColor: colors.primary,
+      },
+      tabBarActiveTintColor: colors.tint,
     }),
     [colors],
   );
@@ -35,13 +44,16 @@ export const BottomTabNavigator = () => {
         size: number;
       },
     ) => {
-      return <BaseIcon name={iconName} color={props.color} size={props.size} />;
+      return <BaseIcon {...props} name={iconName} />;
     },
     [],
   );
 
   return (
-    <BottomTab.Navigator screenOptions={screenOptions}>
+    <BottomTab.Navigator
+      screenOptions={screenOptions}
+      initialRouteName='Notifications'
+    >
       <BottomTab.Screen
         name='Home'
         options={{
@@ -50,11 +62,32 @@ export const BottomTabNavigator = () => {
         component={HomeScreen}
       />
       <BottomTab.Screen
+        name='Groups'
+        options={{
+          tabBarIcon: renderTabIcon.bind(this, 'people'),
+        }}
+        component={GroupScreen}
+      />
+      <BottomTab.Screen
         name='Search'
         options={{
-          tabBarIcon: renderTabIcon.bind(this, 'search'),
+          tabBarIcon: renderTabIcon.bind(this, 'person-add'),
         }}
         component={SearchScreen}
+      />
+      <BottomTab.Screen
+        name='Notifications'
+        options={{
+          tabBarIcon: renderTabIcon.bind(this, 'notifications'),
+        }}
+        component={NotificationsScreen}
+      />
+      <BottomTab.Screen
+        name='Settings'
+        options={{
+          tabBarIcon: renderTabIcon.bind(this, 'settings'),
+        }}
+        component={SettingsScreen}
       />
     </BottomTab.Navigator>
   );

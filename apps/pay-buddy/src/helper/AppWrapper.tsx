@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Platform, PermissionsAndroid } from 'react-native';
+import React, { useEffect } from 'react';
+import { Platform, PermissionsAndroid } from 'react-native';
 import * as Updates from 'expo-updates';
 import * as Notifications from 'expo-notifications';
 
 export const AppWrapper = ({ children }: React.PropsWithChildren) => {
-  const [isUpdaing, setIsUpdaing] = useState(false);
+  // const [isUpdaing, setIsUpdaing] = useState(false);
 
   const onFetchUpdateAsync = async () => {
     try {
@@ -12,16 +12,16 @@ export const AppWrapper = ({ children }: React.PropsWithChildren) => {
         const update = await Updates.checkForUpdateAsync();
 
         if (update.isAvailable) {
-          setIsUpdaing(true);
+          // setIsUpdaing(true);
           await Updates.fetchUpdateAsync();
           setTimeout(async () => {
-            setIsUpdaing(false);
+            // setIsUpdaing(false);
             await Updates.reloadAsync();
           }, 1000);
         }
       }
       if (Platform.OS === 'android') {
-        const permission = await PermissionsAndroid.request(
+        await PermissionsAndroid.request(
           'android.permission.POST_NOTIFICATIONS',
         );
       }

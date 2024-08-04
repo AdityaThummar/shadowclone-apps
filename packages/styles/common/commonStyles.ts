@@ -4,6 +4,10 @@ export const commonStyles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  flexItemCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
   center: {
     alignSelf: 'center',
   },
@@ -38,5 +42,24 @@ export const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  rowItemCenterJustifyAround: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  rowItemCenterJustifyEvenly: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+  },
+  rowItemCenterJustifyBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  screenStyle: {
+    flex: 1,
+    margin: 10,
   },
 });

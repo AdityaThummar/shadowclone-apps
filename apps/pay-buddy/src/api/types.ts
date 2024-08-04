@@ -1,5 +1,5 @@
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { ErrorMessages } from './ApiErrorCodes';
+import { type ErrorMessages } from './ApiErrorCodes';
 import { User } from '@react-native-google-signin/google-signin';
 
 export type ResponseType = {

@@ -13,7 +13,7 @@ import { commonStyles } from 'packages/styles/common';
 import { TextInputProps } from 'react-native';
 import { BaseTextProps, BaseTextStyle, SizeProps, WeightProps } from './text';
 import { ViewStyles } from '../../types/common/commonTypes';
-import { themedStyles } from './wrapper';
+import { themedStyles, useThemed } from './wrapper';
 
 export type InputProps = TextInputProps &
   SizeProps &
@@ -43,6 +43,11 @@ export const Input = (props: InputProps) => {
     ...otherProps
   } = props;
   const styles = s();
+  const {
+    themeValues: {
+      colors: { inputPlaceHolder },
+    },
+  } = useThemed();
 
   const [isFocused, setIsFocused] = useState(false);
   const [textShown, setTextShown] = useState(!isPassword);
@@ -99,7 +104,7 @@ export const Input = (props: InputProps) => {
       >
         <TextInput
           placeholder='Type Something ..'
-          //   placeholderTextColor={inputPlaceHolder}
+          placeholderTextColor={inputPlaceHolder}
           secureTextEntry={!textShown}
           {...otherProps}
           style={[

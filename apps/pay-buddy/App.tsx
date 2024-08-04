@@ -1,26 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
-import { EntryPoint } from './src/navigation';
 import { useFonts } from 'expo-font';
+import * as NavigationBar from 'expo-navigation-bar';
+import { EntryPoint } from './src/navigation';
+import {
+  InterBold,
+  InterMedium,
+  InterRegular,
+  InterSemiBold,
+} from './src/assets';
 
-// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
+
+export const BottomNavBarSetter = async () => {
+  if (Platform.OS === 'android') {
+    await NavigationBar.setBackgroundColorAsync('white');
+    await NavigationBar.setButtonStyleAsync('dark');
+  }
+};
 
 const App = () => {
   const [loaded, error] = useFonts({
-    primaryRegular: require('./src/assets/fonts/Inter-Regular.ttf'),
-    primaryMedium: require('./src/assets/fonts/Inter-Medium.ttf'),
-    primarySemiBold: require('./src/assets/fonts/Inter-SemiBold.ttf'),
-    primaryBold: require('./src/assets/fonts/Inter-Bold.ttf'),
+    primaryMedium: InterMedium,
+    primaryRegular: InterRegular,
+    primarySemiBold: InterSemiBold,
+    primaryBold: InterBold,
   });
 
   const configureNotifications = async () => {
     try {
       await SplashScreen.hideAsync();
       if (Platform.OS === 'android') {
-        const permission = await PermissionsAndroid.request(
+        await PermissionsAndroid.request(
           'android.permission.POST_NOTIFICATIONS',
         );
       }
@@ -36,8 +49,17 @@ const App = () => {
   };
 
   useEffect(() => {
-    loaded && configureNotifications();
-  }, [loaded]);
+    if (loaded) {
+      configureNotifications();
+    }
+    if (error) {
+      console.log('errorerrorerrorerror', error);
+    }
+  }, [loaded, error]);
+
+  useEffect(() => {
+    BottomNavBarSetter();
+  }, []);
 
   return <EntryPoint />;
 };

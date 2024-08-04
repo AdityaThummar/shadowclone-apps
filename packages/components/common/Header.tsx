@@ -13,6 +13,7 @@ export type HeaderProps = {
   disableBack?: boolean;
   onPressBack?: () => void;
   style?: BaseTextStyle;
+  rightComponent?: React.ReactNode;
 } & Omit<BaseTextProps, 'style'>;
 
 export const Header = (props: HeaderProps) => {
@@ -22,6 +23,7 @@ export const Header = (props: HeaderProps) => {
     disableBack = false,
     onPressBack = () => goBack(),
     style = {},
+    rightComponent,
     ...textProps
   } = props;
 
@@ -42,6 +44,7 @@ export const Header = (props: HeaderProps) => {
       <BaseText sizeHuge bold {...textProps} style={[styles.textStyle, style]}>
         {title}
       </BaseText>
+      {rightComponent && rightComponent}
     </View>
   );
 };

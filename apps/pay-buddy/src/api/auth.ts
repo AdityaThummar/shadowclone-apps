@@ -1,12 +1,12 @@
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { Alert } from 'react-native';
-import { ErrorCodes, ErrorMessages } from './ApiErrorCodes';
+import { type ErrorCodes, ErrorMessages } from './ApiErrorCodes';
 import {
   GoogleSigninResponse,
   LoginApiResponseType,
   ResponseType,
 } from './types';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 import { FIREBASE_GOOGLE_WEB_CLIENT_IT } from 'apps/pay-buddy/configs/firebaseConfigs';
 
 export const initGoogleLogin: () => Promise<GoogleSigninResponse> =
@@ -19,13 +19,13 @@ export const initGoogleLogin: () => Promise<GoogleSigninResponse> =
         error: 'no_play_services',
       };
     }
-    const configure = GoogleSignin.configure({
+    GoogleSignin.configure({
       webClientId: FIREBASE_GOOGLE_WEB_CLIENT_IT,
     });
     await GoogleSignin.signOut();
     const response = await GoogleSignin.signIn();
     console.log('🚀 ~ response:', response);
-    if (!!response?.user?.id) {
+    if (response?.user?.id) {
       return {
         success: true,
         data: response,
@@ -78,7 +78,7 @@ export const login: () => Promise<LoginApiResponseType> = async () => {
 
 export const logout: () => Promise<ResponseType> = async () => {
   try {
-    const configure = GoogleSignin.configure({
+    GoogleSignin.configure({
       webClientId: FIREBASE_GOOGLE_WEB_CLIENT_IT,
     });
     await GoogleSignin.signOut();

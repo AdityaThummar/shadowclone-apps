@@ -12,11 +12,11 @@ export const ScreenWrapper = (props: ScreenWrapperProps) => {
     themeValues: { colors, theme },
   } = useThemed();
   const styles = themedStyles(() => ({
-    container: {
-      flex: 1,
-      margin: 10,
-    },
     outerContainer: {
+      backgroundColor: colors.primary,
+    },
+    topSafeAreaViewStyle: {
+      flex: 0,
       backgroundColor: colors.primary,
     },
   }));
@@ -25,7 +25,11 @@ export const ScreenWrapper = (props: ScreenWrapperProps) => {
     <View
       style={[commonStyles.flex, styles.outerContainer, props?.containerStyle]}
     >
-      <SafeAreaView {...props} style={[styles.container, props?.style ?? {}]}>
+      <SafeAreaView style={styles.topSafeAreaViewStyle} />
+      <SafeAreaView
+        {...props}
+        style={[commonStyles.screenStyle, props?.style ?? {}]}
+      >
         {props?.children}
       </SafeAreaView>
       <StatusBar

@@ -4,6 +4,6 @@
     "../../tsconfig.json"
   ],
   "compilerOptions": {
-    "strict": true
+    "strict": true,
   }
 }

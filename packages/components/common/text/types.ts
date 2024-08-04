@@ -1,6 +1,7 @@
 import { TextProps, TextStyle } from 'react-native';
 
 export type BaseTextStyle = Omit<TextStyle, 'fontWeight'>;
+export type BaseTextStyles = BaseTextStyle | BaseTextStyle[];
 
 export type WeightProps = {
   bold?: boolean;
@@ -41,5 +42,5 @@ export type BaseTextProps = WeightProps &
   SizeProps &
   AlignProps &
   Omit<TextProps, 'style'> & {
-    style?: BaseTextStyle | BaseTextStyle[];
+    style?: BaseTextStyles | BaseTextStyles[];
   };

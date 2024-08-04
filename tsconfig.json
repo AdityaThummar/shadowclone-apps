@@ -1,4 +1,7 @@
 {
+  "extends": [
+    "./node_modules/expo/tsconfig.base.json"
+  ],
   "compilerOptions": {
     "jsx": "react",
     "target": "es2016",
@@ -11,17 +14,17 @@
     "baseUrl": ".",
     "paths": {
       "@components": [
-        "./packages/components/common/index.ts"
+        "./packages/components/index.ts"
       ],
       "@styles": [
-        "./packages/styles/common/index.ts"
+        "./packages/styles/index.ts"
       ],
       "@types": [
-        "./packages/types/common/index.ts"
+        "./packages/types/index.ts"
       ],
       "@zustand": [
-        "./packages/zustand/common/index.ts"
-      ]
+        "./packages/zustand/index.ts"
+      ],
     },
   },
 }

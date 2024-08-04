@@ -11,17 +11,17 @@ import {
   useThemed,
 } from '@components';
 import { commonStyles } from '@styles';
-import { useNav } from '../../helper/useNav';
+// import { useNav } from '../../helper/useNav';
 
 export const LoginScreen = () => {
   const styles = s();
   const {
     themeValues: { colors, setTheme, theme },
   } = useThemed();
-  const { navigation } = useNav();
+  // const { navigation } = useNav();
 
   const onPressSignup = () => {
-    navigation.navigate('Signup');
+    // navigation.navigate('Signup');
   };
 
   return (
