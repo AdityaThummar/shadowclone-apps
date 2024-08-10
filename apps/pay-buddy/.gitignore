@@ -34,9 +34,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# configs
-configs/*
-
 # app bundles
 *.apk
 *.aab
+
+# configs
+configs/*

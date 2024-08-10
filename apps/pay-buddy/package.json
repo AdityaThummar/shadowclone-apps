@@ -6,7 +6,16 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "set-build-env": "cd scripts/ && node gitIgnoreForBuild.js && cd ..",
+    "clean-build-env": "cd scripts/ && node gitIgnoreRevert.js && cd ..",
+    "build-prev": "yarn set-build-env && eas build -p android --profile preview --local && yarn clean-build-env",
+    "build-dev": "yarn set-build-env && eas build -p android --profile development --local && yarn clean-build-env",
+    "build-prod": "yarn set-build-env && eas build -p android --profile production --local && yarn clean-build-env",
+    "build-play": "yarn set-build-env && eas build -p android --profile play --local && yarn clean-build-env",
+    "c-git": "git clean -fd",
+    "run-ios": "yarn set-build-env && npx expo prebuild -p ios && yarn ios",
+    "clean-ios": "yarn clean-build-env && rm -rf ios && git checkout -- package.json"
   },
   "dependencies": {
     "@react-native-firebase/app": "^20.3.0",
