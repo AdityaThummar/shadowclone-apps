@@ -63,6 +63,13 @@
           "iosUrlScheme": "com.googleusercontent.apps.378779412905-50vvk8p51prrkqnbsb12rdku2l2i6hmp"
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow access to $(PRODUCT_NAME) for sharing it with your friends",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for taking pictures and share with friends"
+        }
+      ],
       "expo-font",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
