@@ -17,7 +17,7 @@
       "googleServicesFile": "./configs/pay-buddy-ios-google-service.plist"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

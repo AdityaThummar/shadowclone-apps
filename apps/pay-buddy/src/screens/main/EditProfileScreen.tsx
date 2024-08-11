@@ -66,10 +66,6 @@ export const EditProfileScreen = () => {
       uploadUserProfile;
     // : () => {};
     setLoader('Updating profile');
-    setTimeout(() => {
-      setLoader();
-    }, 2000);
-    return;
     const response = await functionRef(data);
 
     if (response.success && response.data?.name && user?.firebaseUser) {
