@@ -21,7 +21,9 @@ export const EntryWrapper = ({ children }: React.PropsWithChildren) => {
       await NavigationBar.setBackgroundColorAsync(
         colors?.primary ?? '#FFFFFF00',
       );
-      await NavigationBar.setButtonStyleAsync(theme);
+      await NavigationBar.setButtonStyleAsync(
+        theme === 'dark' ? 'light' : 'dark',
+      );
     }
   };
 

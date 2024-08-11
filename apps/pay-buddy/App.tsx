@@ -11,7 +11,6 @@ import {
   InterSemiBold,
 } from './src/assets';
 import { EXPO_PROJECT_ID } from './configs/expoConfigs';
-import { useThemed } from '@components';
 
 SplashScreen.preventAutoHideAsync();
 

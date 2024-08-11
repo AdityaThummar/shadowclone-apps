@@ -1,66 +1,68 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   BaseText,
   Header,
-  NotificationCard,
+  // NotificationCard,
   ScreenWrapper,
-  themedStyles,
-  UserCardHalf,
+  // themedStyles,
+  // UserCardHalf,
 } from '@components';
 import {
-  FlatList,
-  SectionList,
-  SectionListData,
-  SectionListRenderItem,
+  // FlatList,
+  // // SectionList,
+  // SectionListData,
+  // SectionListRenderItem,
+  View,
 } from 'react-native';
+import { commonStyles } from '@styles';
 
-type SectionType = {
-  title: string;
-  data: unknown[];
-};
+// type SectionType = {
+//   title: string;
+//   data: unknown[];
+// };
 
 export const NotificationsScreen = () => {
-  const styles = s();
+  // const styles = s();
 
   // const NotificationData = [];
 
-  const renderUsers = useCallback(() => {
-    return <UserCardHalf actions={[{ title: 'Add' }, { title: 'Remove' }]} />;
-  }, []);
+  // const renderUsers = useCallback(() => {
+  //   return <UserCardHalf actions={[{ title: 'Add' }, { title: 'Remove' }]} />;
+  // }, []);
 
-  const renderPayCard: SectionListRenderItem<
-    string,
-    { title: string; data: { sample: string } }
-  > = useCallback(({ section }) => {
-    console.log('🚀 ~ >=useCallback ~ section:', section);
-    if (section.title?.includes('Friend Requests')) {
-      return (
-        <FlatList
-          data={section.data?.[0]}
-          horizontal
-          renderItem={renderUsers}
-          showsHorizontalScrollIndicator={false}
-        />
-      );
-    }
-    return <NotificationCard />;
-  }, []);
+  // const renderPayCard: SectionListRenderItem<
+  //   string,
+  //   { title: string; data: { sample: string } }
+  // > = useCallback(({ section }) => {
+  //   console.log('🚀 ~ >=useCallback ~ section:', section);
+  //   if (section.title?.includes('Friend Requests')) {
+  //     return (
+  //       <FlatList
+  //         data={section.data?.[0]}
+  //         horizontal
+  //         renderItem={renderUsers}
+  //         showsHorizontalScrollIndicator={false}
+  //       />
+  //     );
+  //   }
+  //   return <NotificationCard />;
+  // }, []);
 
-  const renderSectionHeader = useCallback(
-    (props: { section: SectionListData<string, SectionType> }) => {
-      return (
-        <BaseText bold sizeMedium style={[styles.sectionHeader]}>
-          {props.section.title}
-        </BaseText>
-      );
-    },
-    [styles],
-  );
+  // const renderSectionHeader = useCallback(
+  //   (props: { section: SectionListData<string, SectionType> }) => {
+  //     return (
+  //       <BaseText bold sizeMedium style={[styles.sectionHeader]}>
+  //         {props.section.title}
+  //       </BaseText>
+  //     );
+  //   },
+  //   [styles],
+  // );
 
   return (
     <ScreenWrapper>
       <Header title='Notifications' disableBack />
-      <SectionList
+      {/* <SectionList
         sections={[
           {
             title: 'Friend Requests (6)',
@@ -90,17 +92,22 @@ export const NotificationsScreen = () => {
         contentContainerStyle={{
           paddingBottom: 15,
         }}
-      />
+      /> */}
+      <View style={[commonStyles.centerCenter, commonStyles.flex]}>
+        <BaseText regular sizeRegular center>
+          No Data
+        </BaseText>
+      </View>
     </ScreenWrapper>
   );
 };
 
-const s = () =>
-  themedStyles(({ colors }) => ({
-    sectionHeader: {
-      paddingHorizontal: 10,
-      paddingVertical: 10,
-      backgroundColor: colors.primary,
-      colors: colors.text,
-    },
-  }));
+// const s = () =>
+//   themedStyles(({ colors }) => ({
+//     sectionHeader: {
+//       paddingHorizontal: 10,
+//       paddingVertical: 10,
+//       backgroundColor: colors.primary,
+//       colors: colors.text,
+//     },
+//   }));

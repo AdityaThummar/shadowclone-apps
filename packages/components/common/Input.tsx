@@ -106,12 +106,15 @@ export const Input = (props: InputProps) => {
           placeholder='Type Something ..'
           placeholderTextColor={inputPlaceHolder}
           secureTextEntry={!textShown}
+          autoCapitalize='none'
+          autoComplete='off'
+          autoCorrect={false}
           {...otherProps}
           style={[
             weightStyles,
             sizeStyles,
             styles.input,
-            isFocused && styles.focusedInput,
+            // isFocused && styles.focusedInput,
             !!error && styles.errorOutline,
             otherProps.style ?? {},
           ]}

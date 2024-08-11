@@ -17,6 +17,7 @@ export type ThemeColorsType = {
   dividerColor?: string;
   cardBackgroundColor?: string;
   completedCardBackground?: string;
+  modalBackgroundColor?: string;
 };
 
 export type ResourceType = {

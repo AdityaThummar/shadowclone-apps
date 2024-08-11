@@ -17,6 +17,7 @@ export const ColorResource: ResourceType = {
     inputPlaceHolder: '#888888',
     cardBackgroundColor: '#FFFFFF',
     completedCardBackground: '#DAE6FB',
+    modalBackgroundColor: '#000000AA',
 
     ...STATIC_COLORS,
   },
@@ -31,6 +32,7 @@ export const ColorResource: ResourceType = {
     inputPlaceHolder: '#777777',
     cardBackgroundColor: '#222222',
     completedCardBackground: '#22223F',
+    modalBackgroundColor: '#000000AA',
 
     ...STATIC_COLORS,
   },

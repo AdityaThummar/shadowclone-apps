@@ -1,6 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Header, Input, ScreenWrapper, UserCardHalf } from '@components';
 import { FlatList } from 'react-native';
+import { getAllUsers } from '../../api/users';
+import { UserProfileType } from '../../api/types';
 
 export type SearchScreenProps = {
   isSelect?: boolean;
@@ -8,19 +10,32 @@ export type SearchScreenProps = {
 
 export const SearchScreen = (props: SearchScreenProps) => {
   const { isSelect = false } = props;
+  const [users, setUsers] = useState<UserProfileType[]>([]);
 
   const renderUsers = useCallback(
-    (item: { item: unknown; index: number }) => {
+    (item: { item: UserProfileType; index: number }) => {
       return (
         <UserCardHalf
+          item={item.item}
           actions={[{ title: 'Add' }, { title: "Don't Suggest" }]}
           isSelection={isSelect}
-          selected={[0, 1, 2, 5].includes(item.index)}
+          // selected={[0, 1, 2, 5].includes(item.index)}
         />
       );
     },
     [isSelect],
   );
+
+  const getAllAppUsers = async () => {
+    const response = await getAllUsers();
+    if (response?.success && response?.data) {
+      setUsers(response?.data?.users);
+    }
+  };
+
+  useEffect(() => {
+    getAllAppUsers();
+  }, []);
 
   return (
     <ScreenWrapper>
@@ -30,7 +45,7 @@ export const SearchScreen = (props: SearchScreenProps) => {
       />
       <Input style={{ marginBottom: 10 }} placeholder='Search here ..' />
       <FlatList
-        data={[1, 2, 3, 5, 5, 5, 5, 5, 5]}
+        data={users}
         showsVerticalScrollIndicator={false}
         renderItem={renderUsers}
         numColumns={2}

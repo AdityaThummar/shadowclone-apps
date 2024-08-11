@@ -1,13 +1,19 @@
+import { UserProfileType } from '../api/types';
+import { BottomTabScreenProps as BottomTabScreenProp } from '@react-navigation/bottom-tabs';
+
 export type StackScreenProps = {
   SocialLogin: undefined;
-  BottomTab: undefined;
+  BottomTab: BottomTabScreenProp<BottomTabScreenProps>;
   AddEditRequestScreen: undefined;
   SelectItemScreen?: {
     type?: 'group' | 'member';
     header?: string;
   };
   AddEditGroupScreen?: undefined;
-  EditProfileScreen?: undefined;
+  EditProfileScreen?: {
+    type?: 'new-profile' | 'edit-profile' | 'new-group' | 'edit-group';
+    userData?: UserProfileType;
+  };
 };
 
 export type BottomTabScreenProps = {

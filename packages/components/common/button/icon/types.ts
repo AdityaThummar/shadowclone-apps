@@ -1,22 +1,8 @@
 import { GestureResponderEvent, TextStyle } from 'react-native';
-import { ViewStyles } from '../../../../types/commonTypes';
+import * as VectorIcons from '@expo/vector-icons';
+import { ViewStyles } from '@types';
 
-export type iFamily =
-  | 'MaterialCommunityIcons'
-  | 'Entypo'
-  | 'Ionicons'
-  | 'AntDesign'
-  | 'EvilIcons'
-  | 'Feather'
-  | 'Fontisto'
-  | 'FontAwesome'
-  | 'FontAwesome5'
-  | 'Foundation'
-  | 'MaterialIcons'
-  | 'Octicons'
-  | 'SimpleLineIcons'
-  | 'Zocial'
-  | undefined;
+export type iFamily = keyof typeof VectorIcons;
 
 export type iconProps = {
   name?: string;

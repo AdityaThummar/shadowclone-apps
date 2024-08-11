@@ -16,9 +16,7 @@ import { useNav } from '../../helper';
 import { Divider } from 'packages/components/common/Divider';
 
 export const AddEditRequestScreen = () => {
-  const {
-    navigation: { navigate },
-  } = useNav();
+  const { navigate } = useNav();
 
   const goToAddItem = (type: 'group' | 'member' = 'member') => {
     navigate('SelectItemScreen', {

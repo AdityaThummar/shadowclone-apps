@@ -1,10 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, {
+  // useCallback,
+  useState,
+} from 'react';
 import {
   BaseText,
-  Card,
-  IconButton,
-  PayRequestCard,
-  PlusButton,
+  // Card,
+  // IconButton,
+  // PayRequestCard,
+  // PlusButton,
   ScreenWrapper,
   TabItemType,
   themedStyles,
@@ -13,13 +16,13 @@ import {
 } from '@components';
 import {
   Alert,
-  SectionList,
-  SectionListData,
-  SectionListRenderItem,
+  // SectionList,
+  // SectionListData,
+  // SectionListRenderItem,
   View,
 } from 'react-native';
 import { commonStyles } from '@styles';
-import { useNav } from '../../helper';
+// import { useNav } from '../../helper';
 
 export const showInProgress = () => {
   Alert.alert(
@@ -34,52 +37,50 @@ const Tabs: TabItemType[] = [
   { name: "Your's" },
 ];
 
-type SectionType = {
-  title: string;
-  data: readonly string[];
-};
+// type SectionType = {
+//   title: string;
+//   data: readonly string[];
+// };
 
 export const HomeScreen = () => {
   const {
     themeValues: { colors },
   } = useThemed();
-  const {
-    navigation: { navigate },
-  } = useNav();
+  // const { navigate } = useNav();
 
   const styles = s();
 
   const [selectedTab, setSelectedTab] = useState<TabItemType>(Tabs[0]);
 
-  const renderPayCard: SectionListRenderItem<
-    string,
-    { title: string; data: string }
-  > = useCallback(() => {
-    return (
-      <PayRequestCard
-        // data={item}
-        isOwn={selectedTab.name === Tabs[2].name}
-        isPaid={selectedTab.name === Tabs[1].name}
-      />
-    );
-  }, [selectedTab, styles]);
+  // const renderPayCard: SectionListRenderItem<
+  //   string,
+  //   { title: string; data: string }
+  // > = useCallback(() => {
+  //   return (
+  //     <PayRequestCard
+  //       // data={item}
+  //       isOwn={selectedTab.name === Tabs[2].name}
+  //       isPaid={selectedTab.name === Tabs[1].name}
+  //     />
+  //   );
+  // }, [selectedTab, styles]);
 
-  const renderSectionHeader: (props: {
-    section: SectionListData<string, SectionType>;
-  }) => React.ReactElement = useCallback(
-    (props: { section: SectionListData<string, SectionType> }) => {
-      return (
-        <BaseText bold sizeMedium style={[styles.sectionHeader]}>
-          {props.section.title}
-        </BaseText>
-      );
-    },
-    [styles],
-  );
+  // const renderSectionHeader: (props: {
+  //   section: SectionListData<string, SectionType>;
+  // }) => React.ReactElement = useCallback(
+  //   (props: { section: SectionListData<string, SectionType> }) => {
+  //     return (
+  //       <BaseText bold sizeMedium style={[styles.sectionHeader]}>
+  //         {props.section.title}
+  //       </BaseText>
+  //     );
+  //   },
+  //   [styles],
+  // );
 
-  const goToAddNew = () => {
-    navigate('AddEditRequestScreen');
-  };
+  // const goToAddNew = () => {
+  //   navigate('AddEditRequestScreen');
+  // };
 
   return (
     <ScreenWrapper style={[{ margin: 0, backgroundColor: colors.primary }]}>
@@ -90,12 +91,12 @@ export const HomeScreen = () => {
           onPressTab={setSelectedTab}
           style={[commonStyles.flex]}
         />
-        <PlusButton
+        {/* <PlusButton
           containerStyle={[{ marginRight: 20 }]}
           onPress={goToAddNew}
-        />
+        /> */}
       </View>
-      <ScreenWrapper style={{ marginTop: 0 }}>
+      <ScreenWrapper style={[commonStyles.centerCenter, { marginTop: 0 }]}>
         {/* <Card>
           <BaseText semibold center>
             {`All these are just a skeleton components that we will develop in upmost version, For now just know and enjoy this demo app we allow you to access.Thank you for using this App 🙂`}
@@ -114,7 +115,7 @@ export const HomeScreen = () => {
         </ScrollView> */}
 
         {/* <Input style={{ marginTop: 10 }} /> */}
-        <SectionList
+        {/* <SectionList
           sections={[
             {
               title: 'Today',
@@ -140,7 +141,10 @@ export const HomeScreen = () => {
           contentContainerStyle={{
             paddingBottom: 15,
           }}
-        />
+        /> */}
+        <BaseText regular sizeRegular>
+          No Data
+        </BaseText>
       </ScreenWrapper>
     </ScreenWrapper>
   );

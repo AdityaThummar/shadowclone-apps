@@ -1,13 +1,11 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { configureStorage } from '@zustand';
 import { create } from 'zustand';
 import { persist, PersistOptions } from 'zustand/middleware';
-
-export type UserType = FirebaseAuthTypes.UserCredential;
+import { UserData } from '../api/types';
 
 export type AuthStateTypes = {
-  user?: UserType;
-  setUser: (user?: UserType) => void;
+  user?: UserData;
+  setUser: (user?: UserData) => void;
 };
 
 export const AuthState = create(
@@ -15,7 +13,7 @@ export const AuthState = create(
     (set: (props: AuthStateTypes) => void, get: () => AuthStateTypes) => {
       return {
         user: undefined,
-        setUser: (u?: UserType) =>
+        setUser: (u?: UserData) =>
           set({
             ...get(),
             user: u,

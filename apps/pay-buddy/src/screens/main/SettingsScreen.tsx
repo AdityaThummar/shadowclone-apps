@@ -1,4 +1,5 @@
 import {
+  Avatar,
   BaseText,
   Card,
   Header,
@@ -11,11 +12,14 @@ import React, { useCallback } from 'react';
 import { AuthState } from '../../zustand/AuthState';
 import { useNav } from '../../helper';
 import { deleteUserAccount, logout } from '../../api';
-import { Alert } from 'react-native';
+import { Alert, View } from 'react-native';
+import { LoadingState } from '@zustand';
+import { commonStyles, hp, wp } from '@styles';
 
 export const SettingsScreen = () => {
-  const { setUser } = AuthState();
-  const { navigation } = useNav();
+  const navigation = useNav();
+  const { setUser, user } = AuthState();
+  const { setLoader } = LoadingState();
 
   const {
     themeValues: { setTheme, theme },
@@ -27,8 +31,7 @@ export const SettingsScreen = () => {
 
   const initLogout = useCallback(async () => {
     setUser(undefined);
-    await logout();
-    await GoogleSignin.signOut();
+    setLoader('Clearing creds');
     navigation.reset({
       index: 0,
       routes: [
@@ -37,10 +40,14 @@ export const SettingsScreen = () => {
         },
       ],
     });
+    await logout();
+    await GoogleSignin.signOut();
+    setLoader();
   }, [setUser]);
 
   const deleteAccount = async () => {
     try {
+      setLoader('Deleting profile');
       const response = await deleteUserAccount();
       navigation.reset({
         index: 0,
@@ -50,8 +57,10 @@ export const SettingsScreen = () => {
           },
         ],
       });
+      setLoader();
       console.log('🚀 ~ deleteAccount ~ response:', response);
     } catch (error) {
+      setLoader();
       console.log('🚀 ~ deleteAccount ~ error:', error);
     }
   };
@@ -73,7 +82,7 @@ export const SettingsScreen = () => {
   };
 
   const goToEditProfile = () => {
-    navigation.navigate('EditProfileScreen');
+    navigation.navigate('EditProfileScreen', { type: 'edit-profile' });
   };
 
   return (
@@ -94,6 +103,25 @@ export const SettingsScreen = () => {
           {`You can logout by pressing on below "Logout" button`}
         </BaseText>
       </Card> */}
+      <Card
+        style={[
+          commonStyles.rowItemsCenter,
+          {
+            gap: wp(2),
+          },
+        ]}
+        disabled
+      >
+        <Avatar uri={user?.userProfile?.image} size='medium' />
+        <View style={[commonStyles.flex, { gap: hp(0.3) }]}>
+          <BaseText bold sizeHugeExtra numberOfLines={2}>
+            {user?.userProfile?.name}
+          </BaseText>
+          <BaseText semibold sizeMedium numberOfLines={2}>
+            {user?.userProfile?.bio}
+          </BaseText>
+        </View>
+      </Card>
       <PrimaryButton title='Edit Account' onPress={goToEditProfile} />
       <PrimaryButton title='Switch Theme' onPress={toggleTheme} />
       <PrimaryButton title='Delete Account' onPress={confirmDelete} />

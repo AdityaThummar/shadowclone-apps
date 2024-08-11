@@ -36,7 +36,13 @@ export const StackNavigation = () => {
   return (
     <NStack.Navigator
       screenOptions={screenOptions}
-      initialRouteName={user?.user?.uid ? 'BottomTab' : 'SocialLogin'}
+      initialRouteName={
+        user?.firebaseUser?.user?.uid
+          ? user?.userProfile?.name
+            ? 'BottomTab'
+            : 'EditProfileScreen'
+          : 'SocialLogin'
+      }
     >
       <NStack.Screen name='SocialLogin' component={SocialLoginScreen} />
       <NStack.Screen name='BottomTab' component={BottomTabNavigator} />
@@ -46,7 +52,11 @@ export const StackNavigation = () => {
       />
       <NStack.Screen name='SelectItemScreen' component={SelectItemScreen} />
       <NStack.Screen name='AddEditGroupScreen' component={AddEditGroupScreen} />
-      <NStack.Screen name='EditProfileScreen' component={EditProfileScreen} />
+      <NStack.Screen
+        name='EditProfileScreen'
+        component={EditProfileScreen}
+        initialParams={{ type: 'new-profile', userData: undefined }}
+      />
     </NStack.Navigator>
   );
 };

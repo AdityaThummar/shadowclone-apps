@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   BaseText,
   GoogleButton,
@@ -7,37 +7,46 @@ import {
   themedStyles,
   useThemed,
 } from '@components';
-import { hp } from '@styles';
+import { hp, wp } from '@styles';
 import { login } from '../../api';
 import { AuthState } from '../../zustand/AuthState';
 import { useNav } from '../../helper';
 import { Image } from 'react-native';
+import { LoadingState } from '@zustand';
+import { Logos } from '../../assets';
 
 export const SocialLoginScreen = () => {
-  const { screenStyle, googleBtnStyle } = s();
+  const { reset } = useNav();
+  const { setUser } = AuthState();
+  const { setLoader } = LoadingState();
+
   const {
     themeValues: { colors },
   } = useThemed();
+  const { screenStyle, googleBtnStyle } = s();
 
-  const { setUser } = AuthState();
-  const { navigation } = useNav();
-
-  const googleLogin = async () => {
-    console.log('logged');
-    const response = await login();
-    console.log('🚀 ~ googleLogin ~ response:', response);
+  const googleLogin = useCallback(async () => {
+    setLoader('Signin in');
+    const response = await login(setLoader);
+    setLoader();
     if (response?.success && response?.data) {
       setUser(response?.data);
-      navigation.reset({
+      const isExistingUser = response?.data?.userProfile?.name;
+      reset({
         index: 0,
         routes: [
           {
-            name: 'BottomTab',
+            name: isExistingUser ? 'BottomTab' : 'EditProfileScreen',
+            params: isExistingUser
+              ? {}
+              : {
+                  type: 'new-profile',
+                },
           },
         ],
       });
     }
-  };
+  }, [login, setUser]);
 
   return (
     <ScreenWrapper style={screenStyle}>
@@ -45,17 +54,24 @@ export const SocialLoginScreen = () => {
         Pay Buddy
       </BaseText> */}
       <Image
-        source={require('../../assets/logo/PayBuddy Original Logo.png')}
+        source={Logos.PayBuddyLogo}
         style={{
-          height: 100,
-          width: 200,
+          height: hp(35),
+          width: wp(90),
           alignSelf: 'center',
+          // backgroundColor: 'red',
+          transform: [
+            {
+              rotate: '-35deg',
+            },
+          ],
+          marginBottom: hp(2),
         }}
         resizeMode='contain'
         tintColor={colors.secondary}
       />
       <Header disableBack title='Sign in' center />
-      <BaseText medium center>
+      <BaseText medium center style={{ maxWidth: wp(90) }}>
         {`For extra security and app's integrity, Pay Buddy will only accessible via Google sign-in`}
       </BaseText>
       <GoogleButton
@@ -76,5 +92,6 @@ const s = () =>
     },
     googleBtnStyle: {
       marginTop: hp(1),
+      width: wp(70),
     },
   }));

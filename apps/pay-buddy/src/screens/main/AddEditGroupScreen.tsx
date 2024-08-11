@@ -14,9 +14,7 @@ import { GroupScreen } from './GroupScreen';
 import { SearchScreen } from './SearchScreen';
 
 export const AddEditGroupScreen = () => {
-  const {
-    navigation: { push },
-  } = useNav();
+  const { push } = useNav();
 
   const goToAddItem = () => {
     push('SelectItemScreen', {

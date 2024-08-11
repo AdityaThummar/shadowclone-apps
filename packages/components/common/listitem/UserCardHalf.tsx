@@ -7,6 +7,8 @@ import { BaseText } from '../text';
 import { Divider } from '../Divider';
 import { IconButton, TextButton } from '../button';
 import { Input, InputProps } from '../Input';
+import { UserProfileType } from 'apps/pay-buddy/src/api/types';
+import { Avatar } from '../image';
 
 export type UserCardActionType = {
   title: string;
@@ -21,6 +23,7 @@ export type UserCardhalfProps = {
   inputProps?: InputProps;
   isSelection?: boolean;
   selected?: boolean;
+  item?: UserProfileType;
 };
 
 export const UserCardHalf = (props: UserCardhalfProps) => {
@@ -32,6 +35,7 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
     inputProps = {},
     isSelection = false,
     selected = false,
+    item,
   } = props;
 
   const {
@@ -74,19 +78,9 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
           color={colors.tint}
         />
       )}
-      <Image
-        source={{
-          uri: 'https://imgs.search.brave.com/J2b4U21i3ZjGLwmsPGTsOAEDTsIJk2cYuNWPhk9RXJw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMudW5zcGxhc2gu/Y29tL3Bob3RvLTE0/ODQ1MTU5OTE2NDct/YzU3NjBmY2VjZmM3/P2ZtPWpwZyZxPTYw/Jnc9MzAwMCZpeGxp/Yj1yYi00LjAuMyZp/eGlkPU0zd3hNakEz/ZkRCOE1IeHpaV0Z5/WTJoOE1URjhmRzFo/YkdWOFpXNThNSHg4/TUh4OGZEQT0.jpeg',
-        }}
-        style={{
-          height: avatarSize === 'big' ? 100 : 80,
-          width: avatarSize === 'big' ? 100 : 80,
-          borderRadius: 100,
-          alignSelf: 'center',
-        }}
-      />
-      <BaseText semibold sizeMedium center>
-        Darshan Golakiya
+      <Avatar uri={item?.image} />
+      <BaseText semibold sizeMedium center numberOfLines={2}>
+        {item?.name}
       </BaseText>
       {!!actions && actions.length > 0 && !isSelection && (
         <>

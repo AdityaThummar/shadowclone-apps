@@ -1,6 +1,8 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import { Alert, Linking, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 import {
+  Avatar,
   Header,
   IconButton,
   Input,
@@ -8,59 +10,291 @@ import {
   ScreenWrapper,
   useThemed,
 } from '@components';
-import { registerErrorHandlers } from 'expo-dev-client';
-import { useNav } from '../../helper';
+import { RootRouteProps, useNav } from '../../helper';
+import { useRoute } from '@react-navigation/native';
+import { AuthState } from '../../zustand/AuthState';
+import { hp, wp } from '@styles';
+import { UserProfileType } from '../../api/types';
+import { uploadUserProfile, uploadUserProfilePhoto } from '../../api';
+import { LoadingState } from '@zustand';
 
 export const EditProfileScreen = () => {
+  const { params } = useRoute<RootRouteProps<'EditProfileScreen'>>();
+  const { reset, goBack } = useNav();
+
+  const { user, setUser } = AuthState();
+  const { setLoader } = LoadingState();
   const {
     themeValues: { colors },
   } = useThemed();
+
+  const [data, setData] = useState<UserProfileType>(
+    params?.userData?.name
+      ? params?.userData
+      : {
+          name: user?.userProfile?.name ?? '',
+          bio: user?.userProfile?.bio ?? '',
+          image:
+            user?.userProfile?.image ??
+            user?.firebaseUser?.user?.photoURL ??
+            '',
+        },
+  );
+
+  const [pickedImageResponse, setPickedImageResponse] =
+    useState<ImagePicker.ImagePickerResult>();
+
+  console.log(
+    '🚀 ~ EditProfileScreen ~ pickedImageResponse:',
+    pickedImageResponse,
+  );
+
+  const setDetail = useCallback(
+    (detail: keyof UserProfileType, data: string) => {
+      setData((pre) => ({ ...pre, [detail]: data }));
+    },
+    [],
+  );
+
+  const submit = useCallback(async () => {
+    if (!params?.type) {
+      return;
+    }
+    const functionRef =
+      // ['new-profile', 'edit-profile'].includes(params?.type)
+      //   ?
+      uploadUserProfile;
+    // : () => {};
+    setLoader('Updating profile');
+    setTimeout(() => {
+      setLoader();
+    }, 2000);
+    return;
+    const response = await functionRef(data);
+
+    if (response.success && response.data?.name && user?.firebaseUser) {
+      let profileData = response.data;
+      if (pickedImageResponse?.assets?.[0]?.uri) {
+        const uploadPhoto = await uploadUserProfilePhoto(
+          pickedImageResponse?.assets?.[0]?.uri,
+        );
+
+        if (uploadPhoto?.success) {
+          const response2 = await functionRef({
+            ...data,
+            image: uploadPhoto.data?.uri,
+          });
+          if (response2?.success && response2?.data) {
+            profileData = response2?.data;
+          }
+        }
+      }
+      setLoader();
+
+      setUser({ firebaseUser: user?.firebaseUser, userProfile: profileData });
+      if (['edit-profile', 'edit-group'].includes(params?.type)) {
+        goBack();
+      } else {
+        reset({
+          index: 0,
+          routes: [
+            {
+              name: 'BottomTab',
+            },
+          ],
+        });
+      }
+    }
+
+    console.log('🚀 ~ submit ~ response:', response);
+  }, [data, pickedImageResponse]);
+
+  const openCamera = async () => {
+    try {
+      setLoader('Processing camera');
+      const permission = await ImagePicker.getCameraPermissionsAsync();
+      if (permission?.granted) {
+        const response = await ImagePicker.launchCameraAsync();
+        if (!response?.canceled) {
+          setPickedImageResponse(response);
+        }
+      } else {
+        Alert.alert(
+          'Oops',
+          'You need to give access of Camera to capture an image',
+          [
+            {
+              text: 'Cancel',
+            },
+            {
+              text: 'Open Settings',
+              onPress: Linking.openSettings,
+            },
+          ],
+        );
+      }
+      setLoader();
+    } catch (error) {
+      console.log('🚀 ~ openCamera ~ error:', error);
+      setLoader();
+    }
+  };
+
+  const openGallery = async () => {
+    try {
+      setLoader('Processing photos');
+      const permission = await ImagePicker.getMediaLibraryPermissionsAsync();
+      if (permission?.granted) {
+        const response = await ImagePicker.launchImageLibraryAsync({
+          selectionLimit: 1,
+        });
+        if (!response?.canceled) {
+          setPickedImageResponse(response);
+        }
+      } else {
+        Alert.alert(
+          'Oops',
+          'You need to give access of Photos to select an image',
+          [
+            {
+              text: 'Cancel',
+            },
+            {
+              text: 'Open Settings',
+              onPress: Linking.openSettings,
+            },
+          ],
+        );
+      }
+      setLoader();
+    } catch (error) {
+      console.log('🚀 ~ openGallery ~ error:', error);
+      setLoader();
+    }
+  };
+
   return (
     <ScreenWrapper>
-      <Header title='Edit Profile' />
-      <View style={{ alignSelf: 'center' }}>
-        <Image
-          source={{
-            uri: 'https://imgs.search.brave.com/J2b4U21i3ZjGLwmsPGTsOAEDTsIJk2cYuNWPhk9RXJw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMudW5zcGxhc2gu/Y29tL3Bob3RvLTE0/ODQ1MTU5OTE2NDct/YzU3NjBmY2VjZmM3/P2ZtPWpwZyZxPTYw/Jnc9MzAwMCZpeGxp/Yj1yYi00LjAuMyZp/eGlkPU0zd3hNakEz/ZkRCOE1IeHpaV0Z5/WTJoOE1URjhmRzFo/YkdWOFpXNThNSHg4/TUh4OGZEQT0.jpeg',
-          }}
-          style={{
-            height: 150,
-            width: 150,
-            borderRadius: 100,
-            alignSelf: 'center',
-            marginVertical: 15,
-          }}
-        />
-        <IconButton
-          name='pencil'
-          iFamily='Foundation'
+      <Header
+        title={
+          params?.type === 'new-profile' ? 'Create new profile' : 'Edit Profile'
+        }
+        disableBack={params?.type === 'new-profile'}
+      />
+      <View style={{ alignSelf: 'center', marginTop: hp(2) }}>
+        <Avatar
+          uri={pickedImageResponse?.assets?.[0]?.uri ?? data?.image}
+          size='big'
           containerStyle={{
-            position: 'absolute',
-            top: -10,
-            right: -10,
-            backgroundColor: colors.tint,
-            height: 40,
-            width: 40,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 30,
-            elevation: 4,
-            shadowColor: colors.tint,
-            shadowRadius: 2,
-            shadowOpacity: 0.5,
-            shadowOffset: {
-              height: 0,
-              width: 0,
-            },
-          }}
-          iconStyle={{
-            color: colors.primary,
+            marginVertical: hp(2),
           }}
         />
+        <View
+          style={[
+            {
+              position: 'absolute',
+              top: -hp(1),
+              right: -wp(12),
+              width: wp(19),
+              // backgroundColor: 'red',
+            },
+          ]}
+        >
+          <IconButton
+            name='pencil'
+            iFamily='Foundation'
+            containerStyle={{
+              backgroundColor: colors.tint,
+              height: 40,
+              width: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 30,
+              elevation: 4,
+              shadowColor: colors.tint,
+              shadowRadius: 2,
+              shadowOpacity: 0.5,
+              shadowOffset: {
+                height: 0,
+                width: 0,
+              },
+              alignSelf: 'flex-start',
+            }}
+            iconStyle={{
+              color: colors.primary,
+            }}
+            onPress={openGallery}
+          />
+          <IconButton
+            name='camera'
+            onPress={openCamera}
+            containerStyle={{
+              backgroundColor: colors.tint,
+              height: 40,
+              width: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 30,
+              elevation: 4,
+              shadowColor: colors.tint,
+              shadowRadius: 2,
+              shadowOpacity: 0.5,
+              shadowOffset: {
+                height: 0,
+                width: 0,
+              },
+              alignSelf: 'flex-end',
+              marginRight: wp(1),
+            }}
+            iconStyle={{
+              color: colors.primary,
+            }}
+          />
+          {!!pickedImageResponse?.assets?.[0]?.uri && (
+            <IconButton
+              name='close'
+              onPress={setPickedImageResponse.bind(this, undefined)}
+              containerStyle={{
+                backgroundColor: colors.tint,
+                height: 40,
+                width: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 30,
+                elevation: 4,
+                shadowColor: colors.tint,
+                shadowRadius: 2,
+                shadowOpacity: 0.5,
+                shadowOffset: {
+                  height: 0,
+                  width: 0,
+                },
+                marginRight: wp(0),
+                marginTop: hp(1.5),
+                alignSelf: 'flex-end',
+              }}
+              iconStyle={{
+                color: colors.primary,
+              }}
+            />
+          )}
+        </View>
       </View>
-      <Input label='Name' />
-      <Input label='Bio' />
-      <PrimaryButton title={'Save'} style={{ marginTop: 15 }} />
+      <Input
+        label='Name'
+        value={data?.name}
+        onChangeText={setDetail.bind(this, 'name')}
+      />
+      <Input
+        label='Bio'
+        value={data.bio}
+        onChangeText={setDetail.bind(this, 'bio')}
+      />
+      <PrimaryButton
+        title={'Save'}
+        style={{ marginTop: 15 }}
+        onPress={submit}
+      />
     </ScreenWrapper>
   );
 };
