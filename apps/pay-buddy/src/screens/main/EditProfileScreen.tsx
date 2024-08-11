@@ -60,6 +60,10 @@ export const EditProfileScreen = () => {
     if (!params?.type) {
       return;
     }
+    if (!data?.name) {
+      Alert.alert('Oops', 'Please enter your name !!');
+      return;
+    }
     const functionRef =
       // ['new-profile', 'edit-profile'].includes(params?.type)
       //   ?
