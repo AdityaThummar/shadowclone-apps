@@ -18,7 +18,7 @@ import { commonStyles, hp, wp } from '@styles';
 
 export const SettingsScreen = () => {
   const navigation = useNav();
-  const { setUser, user } = AuthState();
+  const { setUser, user, clearUser } = AuthState();
   const { setLoader } = LoadingState();
 
   const {
@@ -48,7 +48,7 @@ export const SettingsScreen = () => {
   const deleteAccount = async () => {
     try {
       setLoader('Deleting profile');
-      const response = await deleteUserAccount();
+      await deleteUserAccount();
       navigation.reset({
         index: 0,
         routes: [
@@ -58,10 +58,11 @@ export const SettingsScreen = () => {
         ],
       });
       setLoader();
-      console.log('🚀 ~ deleteAccount ~ response:', response);
     } catch (error) {
       setLoader();
       console.log('🚀 ~ deleteAccount ~ error:', error);
+    } finally {
+      clearUser();
     }
   };
 

@@ -61,6 +61,7 @@ export const getUserProfile: () => Promise<GetUserProfileApiResponseType> =
         name: updatedUserData?.name,
         image: updatedUserData?.image ?? '',
         bio: updatedUserData?.bio ?? '',
+        uid: updatedUserData?.uid ?? '',
       };
 
       return {
@@ -148,11 +149,14 @@ export const deleteUserAccount: () => Promise<ResponseType> = async () => {
 };
 
 export const uploadUserProfile: (
-  data: UserProfileType,
+  data: Omit<UserProfileType, 'uid'>,
 ) => Promise<GetUserProfileApiResponseType> = async (data) => {
   try {
     const user = auth().currentUser;
-    await firestore().collection('users').doc(user?.uid?.toString()).set(data);
+    await firestore()
+      .collection('users')
+      .doc(user?.uid?.toString())
+      .set({ ...data, uid: user?.uid?.toString() });
 
     const updatedUserData = await getUserProfile();
 
@@ -175,10 +179,8 @@ export const uploadUserProfilePhoto: (
     const fetRes = await fetch(uri);
     const blob = await fetRes.blob();
     const storageRef = storage().ref(`users/${user?.uid}`);
-    const uplaod = await storageRef.put(blob);
-    console.log('🚀 ~ )=>uploadUserProfilePhoto ~ uplaod:', uplaod);
+    await storageRef.put(blob);
     const downloadUrl = await storageRef.getDownloadURL();
-    console.log('🚀 ~ )=>uploadUserProfilePhoto ~ uri:', uri);
 
     return {
       success: true,

@@ -22,7 +22,7 @@ export const TextButton = (props: TextButtonProps) => {
         {...textProps}
         style={[styles.text, textProps?.style ?? {}]}
       >
-        {title?.toUpperCase()}
+        {title}
       </BaseText>
     </Touchable>
   );

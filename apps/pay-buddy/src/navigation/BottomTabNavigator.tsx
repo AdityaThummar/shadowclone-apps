@@ -52,7 +52,7 @@ export const BottomTabNavigator = () => {
   return (
     <BottomTab.Navigator
       screenOptions={screenOptions}
-      initialRouteName='Groups'
+      initialRouteName='Search'
     >
       <BottomTab.Screen
         name='Home'

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
-import { Dimensions, Image, FlatList } from 'react-native';
+import { ActivityIndicator, FlatList } from 'react-native';
 import { Card } from '../Card';
-import { commonStyles } from '@styles';
+import { commonStyles, hp, wp } from '@styles';
 import { themedStyles, useThemed } from '../wrapper';
 import { BaseText } from '../text';
 import { Divider } from '../Divider';
@@ -9,6 +9,7 @@ import { IconButton, TextButton } from '../button';
 import { Input, InputProps } from '../Input';
 import { UserProfileType } from 'apps/pay-buddy/src/api/types';
 import { Avatar } from '../image';
+import { ViewStyles } from '@types';
 
 export type UserCardActionType = {
   title: string;
@@ -24,6 +25,8 @@ export type UserCardhalfProps = {
   isSelection?: boolean;
   selected?: boolean;
   item?: UserProfileType;
+  isLoading?: boolean;
+  containerStyle?: ViewStyles;
 };
 
 export const UserCardHalf = (props: UserCardhalfProps) => {
@@ -36,6 +39,8 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
     isSelection = false,
     selected = false,
     item,
+    isLoading = false,
+    containerStyle = {},
   } = props;
 
   const {
@@ -64,6 +69,7 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
       style={[
         commonStyles.flex,
         styles.container,
+        containerStyle,
         isSelection && selected ? styles.selectedStyle : {},
       ]}
     >
@@ -82,36 +88,48 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
       <BaseText semibold sizeMedium center numberOfLines={2}>
         {item?.name}
       </BaseText>
-      {!!actions && actions.length > 0 && !isSelection && (
+      {isLoading ? (
+        <ActivityIndicator
+          style={{
+            marginVertical: hp(1),
+            flex: 1,
+          }}
+          size={'small'}
+        />
+      ) : (
         <>
-          <FlatList
-            data={actions}
-            renderItem={renderActions}
-            ItemSeparatorComponent={() => (
-              <Divider style={{ marginVertical: 5 }} />
-            )}
-            style={{
-              marginVertical: 5,
-            }}
-          />
-        </>
-      )}
-      {isSelection && (
-        <>
-          <Divider />
-          <TextButton title={selected ? 'Remove' : 'Select'} />
-        </>
-      )}
-      {input && (
-        <>
-          <Divider />
-          <Input
-            containerStyle={{ flex: 1, width: 100, alignSelf: 'center' }}
-            style={{ textAlign: 'center' }}
-            bold
-            placeholder='₹50'
-            {...{ onChangeText, ...inputProps }}
-          />
+          {!!actions && actions.length > 0 && !isSelection && (
+            <>
+              <FlatList
+                data={actions}
+                renderItem={renderActions}
+                ItemSeparatorComponent={() => (
+                  <Divider style={{ marginVertical: 5 }} />
+                )}
+                style={{
+                  marginVertical: 5,
+                }}
+              />
+            </>
+          )}
+          {isSelection && (
+            <>
+              <Divider />
+              <TextButton title={selected ? 'Remove' : 'Select'} />
+            </>
+          )}
+          {input && (
+            <>
+              <Divider />
+              <Input
+                containerStyle={{ flex: 1, width: 100, alignSelf: 'center' }}
+                style={{ textAlign: 'center' }}
+                bold
+                placeholder='₹50'
+                {...{ onChangeText, ...inputProps }}
+              />
+            </>
+          )}
         </>
       )}
     </Card>
@@ -122,7 +140,8 @@ const s = () =>
   themedStyles(({ colors }) => ({
     container: {
       gap: 5,
-      maxWidth: Dimensions.get('window').width * 0.45,
+      maxWidth: wp(45),
+      minWidth: wp(40),
     },
     bioContainer: {
       height: 40,

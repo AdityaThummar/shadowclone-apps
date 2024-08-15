@@ -2,7 +2,7 @@ import React from 'react';
 import { SafeAreaView } from 'react-native';
 import { View, ViewProps } from 'react-native';
 import { themedStyles, useThemed } from './ThemeWrapper';
-import { commonStyles } from '@styles';
+import { commonStyles, hp, wp } from '@styles';
 import { ViewStyles } from 'packages/types/common/commonTypes';
 import { BaseStatusBar } from '../BaseStatusBar';
 

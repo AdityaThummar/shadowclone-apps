@@ -8,12 +8,13 @@ import {
 } from 'react-native';
 import { BaseText, getFontWeight } from './text';
 import { getFontSize } from './text/FontSize';
-import { IconButton } from './button';
-import { commonStyles } from 'packages/styles/common';
+import { BaseIcon, IconButton } from './button';
+import { commonStyles, hp, wp } from 'packages/styles/common';
 import { TextInputProps } from 'react-native';
 import { BaseTextProps, BaseTextStyle, SizeProps, WeightProps } from './text';
 import { ViewStyles } from '../../types/common/commonTypes';
 import { themedStyles, useThemed } from './wrapper';
+import { Card } from './Card';
 
 export type InputProps = TextInputProps &
   SizeProps &
@@ -26,6 +27,11 @@ export type InputProps = TextInputProps &
     horizontal?: boolean;
     isPassword?: boolean;
     error?: string;
+    rightComponent?: React.ReactNode;
+    allowClear?: boolean;
+    onClear?: () => void;
+    search?: boolean;
+    onSearch?: () => void;
   };
 
 export const Input = (props: InputProps) => {
@@ -40,6 +46,11 @@ export const Input = (props: InputProps) => {
     horizontal = false,
     isPassword = false,
     error,
+    rightComponent,
+    allowClear = true,
+    onClear,
+    search = false,
+    onSearch,
     ...otherProps
   } = props;
   const styles = s();
@@ -77,6 +88,11 @@ export const Input = (props: InputProps) => {
   const toggleTextVisibility = useCallback(() => {
     setTextShown((pre) => !pre);
   }, []);
+
+  const onClearHandler = useCallback(() => {
+    otherProps?.onChangeText && otherProps?.onChangeText('');
+    onClear && onClear();
+  }, [otherProps?.value, onClear]);
 
   return (
     <View
@@ -130,6 +146,29 @@ export const Input = (props: InputProps) => {
             onPress={toggleTextVisibility}
           />
         )}
+        {allowClear && !!otherProps?.value && (
+          <IconButton
+            containerStyle={[
+              commonStyles.centerCenter,
+              styles.clearButtonContainerStyle,
+            ]}
+            name='close'
+            iconStyle={styles.clearButtonIconStyle}
+            onPress={onClearHandler}
+          />
+        )}
+        {search && otherProps?.value && (
+          <IconButton
+            containerStyle={[
+              commonStyles.centerCenter,
+              styles.clearButtonContainerStyle,
+            ]}
+            name='search'
+            iconStyle={[styles.clearButtonIconStyle, styles.tintedColored]}
+            onPress={onSearch}
+          />
+        )}
+        {rightComponent && rightComponent}
       </View>
       {error && (
         <BaseText style={[styles.errorText]} medium>
@@ -153,6 +192,7 @@ const s = () =>
     inputContainer: {
       flexGrow: 1,
       gap: 8,
+      alignItems: 'center',
     },
     input: {
       fontSize: 18,
@@ -188,5 +228,17 @@ const s = () =>
       borderColor: colors.error,
       borderWidth: 2,
       padding: 8,
+    },
+    clearButtonContainerStyle: {
+      backgroundColor: colors.inputBackground,
+      width: wp(10),
+      height: wp(10),
+      borderRadius: 10,
+    },
+    clearButtonIconStyle: {
+      color: colors.secondary,
+    },
+    tintedColored: {
+      color: colors.tint,
     },
   }));

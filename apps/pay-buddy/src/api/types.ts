@@ -16,6 +16,7 @@ export type UserProfileType = {
   name: string;
   bio?: string;
   image?: string;
+  uid: string;
 };
 
 export type UserData = {
@@ -42,3 +43,10 @@ export type GetUserListApiResponseType = Omit<ResponseType, 'data'> & {
     users: UserProfileType[];
   };
 };
+
+export type UserListType =
+  | 'sent_req'
+  | 'received_req'
+  | 'friends'
+  | 'blocked_users'
+  | 'blocked_by';

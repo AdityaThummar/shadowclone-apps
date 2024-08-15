@@ -31,7 +31,8 @@ export const SocialLoginScreen = () => {
     setLoader();
     if (response?.success && response?.data) {
       setUser(response?.data);
-      const isExistingUser = response?.data?.userProfile?.name;
+      const isExistingUser =
+        response?.data?.userProfile?.name && response?.data?.userProfile?.uid;
       reset({
         index: 0,
         routes: [

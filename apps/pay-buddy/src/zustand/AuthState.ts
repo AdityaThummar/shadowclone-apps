@@ -6,6 +6,7 @@ import { UserData } from '../api/types';
 export type AuthStateTypes = {
   user?: UserData;
   setUser: (user?: UserData) => void;
+  clearUser: () => void;
 };
 
 export const AuthState = create(
@@ -18,6 +19,12 @@ export const AuthState = create(
             ...get(),
             user: u,
           }),
+        clearUser: () => {
+          set({
+            ...get(),
+            user: undefined,
+          });
+        },
       };
     },
     configureStorage('Theme') as PersistOptions<AuthStateTypes>,

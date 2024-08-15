@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform, Text, TextInput } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -15,6 +15,24 @@ import { EXPO_PROJECT_ID } from './configs/expoConfigs';
 SplashScreen.preventAutoHideAsync();
 
 const App = () => {
+  const appText = Text as { defaultProps?: { allowFontScaling?: boolean } };
+  const appTextInput = TextInput as {
+    defaultProps?: { allowFontScaling?: boolean };
+  };
+
+  if (appText?.defaultProps) {
+    appText.defaultProps.allowFontScaling = false;
+  } else {
+    appText.defaultProps = {};
+    appText.defaultProps.allowFontScaling = false;
+  }
+  if (appTextInput?.defaultProps) {
+    appTextInput.defaultProps.allowFontScaling = false;
+  } else {
+    appTextInput.defaultProps = {};
+    appTextInput.defaultProps.allowFontScaling = false;
+  }
+
   const [loaded, error] = useFonts({
     primaryMedium: InterMedium,
     primaryRegular: InterRegular,
@@ -38,8 +56,7 @@ const App = () => {
         tokenResponse,
       );
     } catch (error) {
-      // You can also add an alert() to see the error message in case of an error when fetching updates.
-      // alert(`Error fetching latest Expo update: ${error}`);
+      console.log('🚀 ~ configureNotifications ~ error:', error);
     }
   };
 

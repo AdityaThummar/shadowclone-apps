@@ -38,16 +38,12 @@ export const EditProfileScreen = () => {
             user?.userProfile?.image ??
             user?.firebaseUser?.user?.photoURL ??
             '',
+          uid: user?.userProfile?.uid?.toString() ?? '',
         },
   );
 
   const [pickedImageResponse, setPickedImageResponse] =
     useState<ImagePicker.ImagePickerResult>();
-
-  console.log(
-    '🚀 ~ EditProfileScreen ~ pickedImageResponse:',
-    pickedImageResponse,
-  );
 
   const setDetail = useCallback(
     (detail: keyof UserProfileType, data: string) => {
@@ -105,8 +101,6 @@ export const EditProfileScreen = () => {
         });
       }
     }
-
-    console.log('🚀 ~ submit ~ response:', response);
   }, [data, pickedImageResponse]);
 
   const openCamera = async () => {

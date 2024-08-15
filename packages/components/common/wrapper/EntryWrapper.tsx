@@ -3,6 +3,7 @@ import { View, Platform } from 'react-native';
 import { themedStyles, useThemed } from './ThemeWrapper';
 import * as NavigationBar from 'expo-navigation-bar';
 import { ThemeType } from '@zustand';
+import { FirebaseListner } from 'apps/pay-buddy/src/api/FirebaseListner';
 
 export const EntryWrapper = ({ children }: React.PropsWithChildren) => {
   const styles = themedStyles(({ colors }) => ({
@@ -33,5 +34,10 @@ export const EntryWrapper = ({ children }: React.PropsWithChildren) => {
     }
   }, [theme, colors]);
 
-  return <View style={styles.container}>{children}</View>;
+  return (
+    <View style={styles.container}>
+      {children}
+      <FirebaseListner />
+    </View>
+  );
 };
