@@ -15,10 +15,12 @@ import { deleteUserAccount, logout } from '../../api';
 import { Alert, View } from 'react-native';
 import { LoadingState } from '@zustand';
 import { commonStyles, hp, wp } from '@styles';
+import { UsersState } from '../../zustand';
 
 export const SettingsScreen = () => {
   const navigation = useNav();
   const { setUser, user, clearUser } = AuthState();
+  const { clearState } = UsersState();
   const { setLoader } = LoadingState();
 
   const {
@@ -31,6 +33,7 @@ export const SettingsScreen = () => {
 
   const initLogout = useCallback(async () => {
     setUser(undefined);
+    clearState();
     setLoader('Clearing creds');
     navigation.reset({
       index: 0,
@@ -43,7 +46,7 @@ export const SettingsScreen = () => {
     await logout();
     await GoogleSignin.signOut();
     setLoader();
-  }, [setUser]);
+  }, [setUser, clearState]);
 
   const deleteAccount = async () => {
     try {
@@ -63,6 +66,7 @@ export const SettingsScreen = () => {
       console.log('🚀 ~ deleteAccount ~ error:', error);
     } finally {
       clearUser();
+      clearState();
     }
   };
 
@@ -113,7 +117,7 @@ export const SettingsScreen = () => {
         ]}
         disabled
       >
-        <Avatar uri={user?.userProfile?.image} size='medium' />
+        <Avatar uri={user?.userProfile?.image} size='small' />
         <View style={[commonStyles.flex, { gap: hp(0.3) }]}>
           <BaseText bold sizeHugeExtra numberOfLines={2}>
             {user?.userProfile?.name}

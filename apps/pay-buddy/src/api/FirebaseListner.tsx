@@ -1,10 +1,11 @@
 import auth from '@react-native-firebase/auth';
 import { useEffect } from 'react';
-import { UsersState } from '../zustand';
+import { AuthState, UsersState } from '../zustand';
 import { getUsersForFriend, listnerPath, requestUsersSetter } from './users';
 
 export const FirebaseListner = () => {
   const userId = auth()?.currentUser?.uid;
+  const { user } = AuthState();
   if (!userId) {
     return null;
   }
@@ -99,7 +100,7 @@ export const FirebaseListner = () => {
         blockByUsersListner();
       }
     };
-  }, [userId]);
+  }, [userId, user?.userProfile?.uid]);
 
   return null;
 };
