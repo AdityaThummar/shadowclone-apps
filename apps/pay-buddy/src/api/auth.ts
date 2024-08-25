@@ -14,6 +14,7 @@ import {
 } from './types';
 import { FIREBASE_GOOGLE_WEB_CLIENT_IT } from 'apps/pay-buddy/configs/firebaseConfigs';
 import { NoReasonErrorResponse } from './apiHelpers';
+import { FIREBASE_PATHS } from './FirebasePaths';
 
 export const initGoogleLogin: () => Promise<GoogleSigninResponse> =
   async () => {
@@ -123,6 +124,7 @@ export const logout: () => Promise<ResponseType> = async () => {
       webClientId: FIREBASE_GOOGLE_WEB_CLIENT_IT,
     });
     await GoogleSignin.signOut();
+    await auth().signOut();
     return {
       success: true,
       data: {},
@@ -135,9 +137,20 @@ export const logout: () => Promise<ResponseType> = async () => {
 
 export const deleteUserAccount: () => Promise<ResponseType> = async () => {
   try {
-    const user = auth().currentUser;
-    await firestore().collection('users')?.doc(user?.uid?.toString()).delete();
+    const userId = auth().currentUser?.uid?.toString();
     await auth().currentUser?.delete();
+    GoogleSignin.configure({
+      webClientId: FIREBASE_GOOGLE_WEB_CLIENT_IT,
+    });
+    await GoogleSignin.signOut();
+    await firestore()
+      .collection(FIREBASE_PATHS.users)
+      ?.doc(userId?.toString())
+      .delete();
+    await firestore()
+      .collection(FIREBASE_PATHS.aditionalInfo)
+      ?.doc(userId?.toString())
+      .delete();
     return {
       success: true,
       data: {},

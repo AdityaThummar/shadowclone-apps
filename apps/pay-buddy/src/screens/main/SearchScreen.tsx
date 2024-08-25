@@ -6,9 +6,10 @@ import {
   Header,
   IconButton,
   Input,
+  NotificationCount,
+  PrimaryButton,
   ScreenWrapper,
   themedStyles,
-  UserCardActionType,
   UserCardHalf,
 } from '@components';
 import { FlatList, View } from 'react-native';
@@ -24,35 +25,31 @@ import { KeyboardListner } from '../../components';
 import { commonStyles, hp, wp } from '@styles';
 import { useNav } from '../../helper';
 import { UsersState } from '../../zustand';
+import { SelectionState } from '../../zustand/SelectionState';
 
 export type SearchScreenListTypes =
   | 'group'
   | 'member'
   | 'sent_req'
   | 'blocked_users'
-  | 'friends';
+  | 'friends'
+  | 'select_new_member';
 
 export type SearchScreenProps = {
-  isSelect?: boolean;
-  isSentReq?: boolean;
-  isBlockedUsers?: boolean;
-  isFriends?: boolean;
+  type?: SearchScreenListTypes;
 };
 
 export const SearchScreen = (props: SearchScreenProps) => {
-  const {
-    isSelect = false,
-    isSentReq = false,
-    isBlockedUsers = false,
-    isFriends = false,
-  } = props;
-  const { navigate } = useNav();
+  const { type = 'member' } = props;
+  const { navigate, goBack } = useNav();
   const { sentRequest, newUsers, blockedUsers, friends } = UsersState();
+  const { selectedMemebersForNew, setSelectedMemebersForNew } =
+    SelectionState();
+
+  const styles = s();
 
   const [searchText, setSearchText] = useState<string>('');
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
-
-  const styles = s();
 
   const onPressAdd = useCallback(
     async (user?: UserProfileType) => {
@@ -102,72 +99,45 @@ export const SearchScreen = (props: SearchScreenProps) => {
     }
   }, []);
 
-  const renderUsers = useCallback(
-    (item: { item: UserProfileType; index: number }) => {
-      const Actions: UserCardActionType[] = isFriends
-        ? [
-            {
-              title: 'Remove',
-              onPress: onPressRemoveFriend.bind(this, item.item),
-            },
-          ]
-        : isSentReq
-        ? [
-            {
-              title: 'Cancel Request',
-              onPress: cancelRequest.bind(this, item.item),
-            },
-          ]
-        : isBlockedUsers
-        ? [
-            {
-              title: 'Unblock',
-              onPress: unBlockedUser.bind(this, item.item),
-            },
-          ]
-        : [
-            { title: 'Add', onPress: onPressAdd.bind(this, item.item) },
-            {
-              title: 'Block',
-              onPress: blockedUser.bind(this, item.item),
-            },
-          ];
+  const getListActions = useCallback(() => {
+    switch (type) {
+      case 'friends':
+        return [
+          {
+            title: 'Remove',
+            onPress: onPressRemoveFriend,
+          },
+        ];
 
-      return (
-        <UserCardHalf
-          item={item.item}
-          actions={Actions}
-          isSelection={isSelect}
-          isLoading={loadingItems?.includes(item?.item?.uid)}
-        />
-      );
-    },
-    [isSelect, loadingItems],
-  );
+      case 'sent_req':
+        return [
+          {
+            title: 'Cancel Request',
+            onPress: cancelRequest,
+          },
+        ];
 
-  const searchedArray: UserProfileType[] = useMemo(() => {
-    const stext = searchText?.toLowerCase();
-    const arr = newUsers?.filter((_item) =>
-      _item?.name?.toLowerCase()?.includes(stext),
-    );
-    return searchText
-      ? arr
-      : isSentReq
-      ? sentRequest
-      : isFriends
-      ? friends
-      : isBlockedUsers
-      ? blockedUsers
-      : newUsers;
-  }, [
-    searchText,
-    newUsers,
-    isSentReq,
-    sentRequest,
-    isBlockedUsers,
-    blockedUsers,
-    isFriends,
-  ]);
+      case 'blocked_users':
+        return [
+          {
+            title: 'Unblock',
+            onPress: unBlockedUser,
+          },
+        ];
+
+      case 'member':
+        return [
+          { title: 'Add', onPress: onPressAdd },
+          {
+            title: 'Block',
+            onPress: blockedUser,
+          },
+        ];
+
+      default:
+        return [];
+    }
+  }, [type]);
 
   const onPressOtherUser = (type: SearchScreenListTypes) => {
     navigate('SelectItemScreen', {
@@ -175,30 +145,98 @@ export const SearchScreen = (props: SearchScreenProps) => {
     });
   };
 
-  const hideBack = useMemo(
-    () => !isSelect && !isSentReq && !isBlockedUsers && !isFriends,
-    [isSelect, isSentReq, isBlockedUsers, isFriends],
-  );
-  const hideSearch = useMemo(
-    () => isSentReq || isBlockedUsers || isFriends,
-    [isSentReq, isBlockedUsers, isFriends],
+  const hideBack = useMemo(() => type === 'member', [type]);
+  const hideSearch = useMemo(() => !['member'].includes(type), [type]);
+  const searchedArray: UserProfileType[] = useMemo(() => {
+    const stext = searchText?.toLowerCase();
+    const arr = newUsers?.filter((_item) =>
+      _item?.name?.toLowerCase()?.includes(stext),
+    );
+
+    if (searchText) {
+      return arr;
+    }
+
+    switch (type) {
+      case 'member':
+        return newUsers ?? [];
+      case 'blocked_users':
+        return blockedUsers ?? [];
+      case 'friends':
+        return friends ?? [];
+      case 'sent_req':
+        return sentRequest ?? [];
+      case 'select_new_member':
+        return friends ?? [];
+
+      default:
+        return [];
+    }
+  }, [searchText, newUsers, sentRequest, blockedUsers, type]);
+  const dynamicTitle = useMemo(() => {
+    switch (type) {
+      case 'friends':
+        return 'Your Friends';
+      case 'blocked_users':
+        return 'Blocked users';
+      case 'group':
+        return 'Select Groups';
+      case 'member':
+        return 'Find People';
+      case 'sent_req':
+        return `Sent requests`;
+
+      default:
+        return 'Select Members';
+    }
+  }, [type, sentRequest]);
+  const isSelect = useMemo(() => ['select_new_member'].includes(type), [type]);
+
+  const renderUsers = useCallback(
+    (item: { item: UserProfileType; index: number }) => {
+      const selected =
+        selectedMemebersForNew.findIndex((_) => _.uid === item.item.uid) != -1;
+      const onSelect = () => {
+        setSelectedMemebersForNew(
+          selected
+            ? selectedMemebersForNew.filter((_) => _.uid != item.item.uid)
+            : [...selectedMemebersForNew, item.item],
+        );
+      };
+
+      return (
+        <UserCardHalf
+          item={item.item}
+          actions={getListActions()}
+          isSelection={isSelect}
+          isLoading={loadingItems?.includes(item?.item?.uid)}
+          {...{ onSelect, selected }}
+        />
+      );
+    },
+    [
+      isSelect,
+      loadingItems,
+      type,
+      selectedMemebersForNew,
+      searchedArray,
+      getListActions,
+    ],
   );
 
   return (
     <ScreenWrapper>
       <KeyboardListner />
       <Header
-        title={
-          isSelect
-            ? 'Select Members'
-            : isSentReq
-            ? 'Sent requests'
-            : isFriends
-            ? 'Your Friends'
-            : isBlockedUsers
-            ? 'Blocked users'
-            : 'Find People'
-        }
+        title={`${dynamicTitle}${
+          searchedArray.length > 0 && !hideBack
+            ? ` (${
+                type === 'select_new_member'
+                  ? selectedMemebersForNew.length - 1
+                  : searchedArray.length
+              })`
+            : ``
+        }`}
         disableBack={hideBack}
         rightComponent={
           !hideSearch && (
@@ -210,18 +248,25 @@ export const SearchScreen = (props: SearchScreenProps) => {
                 },
               ]}
             >
-              <IconButton
-                name='do-disturb'
-                iFamily='MaterialIcons'
-                iconStyle={[styles.iconStyle]}
-                onPress={onPressOtherUser.bind(this, 'blocked_users')}
-                size={30}
-              />
-              <IconButton
-                name='paper-plane'
-                iconStyle={[styles.iconStyle]}
-                onPress={onPressOtherUser.bind(this, 'sent_req')}
-              />
+              <View>
+                <IconButton
+                  name='do-disturb'
+                  iFamily='MaterialIcons'
+                  iconStyle={[styles.iconStyle]}
+                  onPress={onPressOtherUser.bind(this, 'blocked_users')}
+                  size={27}
+                />
+                <NotificationCount count={blockedUsers.length} />
+              </View>
+              <View>
+                <IconButton
+                  name='paper-plane'
+                  iconStyle={[styles.iconStyle]}
+                  onPress={onPressOtherUser.bind(this, 'sent_req')}
+                  size={27}
+                />
+                <NotificationCount count={sentRequest.length} />
+              </View>
               <Card
                 style={[commonStyles.rowItemsCenter, styles.friendsContainer]}
                 onPress={onPressOtherUser.bind(this, 'friends')}
@@ -231,8 +276,8 @@ export const SearchScreen = (props: SearchScreenProps) => {
                   iconStyle={[styles.iconStyle]}
                   size={20}
                 />
-                <BaseText sizeTiny semibold>
-                  Friends
+                <BaseText sizeSmall bold style={{ marginRight: wp(1) }}>
+                  {friends.length}
                 </BaseText>
               </Card>
             </View>
@@ -264,15 +309,18 @@ export const SearchScreen = (props: SearchScreenProps) => {
           </BaseText>
         </View>
       ) : (
-        <FlatList
-          data={searchedArray}
-          showsVerticalScrollIndicator={false}
-          renderItem={renderUsers}
-          numColumns={2}
-          contentContainerStyle={{
-            paddingBottom: 15,
-          }}
-        />
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={searchedArray}
+            showsVerticalScrollIndicator={false}
+            renderItem={renderUsers}
+            numColumns={2}
+            contentContainerStyle={{
+              paddingBottom: 15,
+            }}
+          />
+          <PrimaryButton title='Done' onPress={goBack} />
+        </View>
       )}
     </ScreenWrapper>
   );
@@ -286,8 +334,10 @@ const s = () =>
     friendsContainer: {
       backgroundColor: colors.inputBackground,
       borderRadius: 10,
-      padding: wp(1.5),
+      padding: wp(1),
       gap: wp(1),
       margin: 0,
+      marginLeft: wp(1),
+      paddingHorizontal: wp(2.5),
     },
   }));

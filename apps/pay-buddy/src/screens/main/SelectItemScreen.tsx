@@ -12,14 +12,8 @@ export const SelectItemScreen = () => {
       {/* <Header title={params?.header ?? 'Select'} /> */}
       {params?.type === 'group' ? (
         <GroupScreen isSelect />
-      ) : params?.type === 'sent_req' ? (
-        <SearchScreen isSentReq />
-      ) : params?.type === 'friends' ? (
-        <SearchScreen isFriends />
-      ) : params?.type === 'blocked_users' ? (
-        <SearchScreen isBlockedUsers />
       ) : (
-        <SearchScreen isSelect />
+        <SearchScreen type={params?.type} />
       )}
     </>
   );

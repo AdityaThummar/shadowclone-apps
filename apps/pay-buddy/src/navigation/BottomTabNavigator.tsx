@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
@@ -11,11 +11,25 @@ import {
   SearchScreen,
   SettingsScreen,
 } from '../screens';
-import { BaseIcon, useThemed } from '@components';
+import {
+  BaseIcon,
+  BaseText,
+  Card,
+  NotificationCount,
+  useThemed,
+} from '@components';
+import { getUserProfile, logout } from '../api';
+import { useNav } from '../helper';
+import { AuthState, UsersState } from '../zustand';
+import { View } from 'react-native';
+import { hp, wp } from '@styles';
 
 const BottomTab = createBottomTabNavigator<BottomTabScreenProps>();
 
 export const BottomTabNavigator = () => {
+  const { clearUser } = AuthState();
+  const { reset } = useNav();
+  const { receivedRequests } = UsersState();
   const {
     themeValues: { colors },
   } = useThemed();
@@ -44,15 +58,42 @@ export const BottomTabNavigator = () => {
         size: number;
       },
     ) => {
-      return <BaseIcon {...props} name={iconName} />;
+      return (
+        <View>
+          <BaseIcon {...props} name={iconName} />
+          {iconName === 'notifications' && (
+            <NotificationCount count={receivedRequests.length} />
+          )}
+        </View>
+      );
     },
-    [],
+    [receivedRequests, colors],
   );
+
+  const checkUser = async () => {
+    const response = await getUserProfile();
+    if (!response?.success || !response?.data?.uid) {
+      await logout();
+      clearUser();
+      reset({
+        index: 0,
+        routes: [
+          {
+            name: 'SocialLogin',
+          },
+        ],
+      });
+    }
+  };
+
+  useEffect(() => {
+    checkUser();
+  }, []);
 
   return (
     <BottomTab.Navigator
       screenOptions={screenOptions}
-      initialRouteName='Search'
+      initialRouteName='Groups'
     >
       <BottomTab.Screen
         name='Home'

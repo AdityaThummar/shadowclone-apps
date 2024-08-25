@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Header,
   IconButton,
@@ -14,16 +14,23 @@ import {
 import { commonStyles } from '@styles';
 import { useNav } from '../../helper';
 import { Divider } from 'packages/components/common/Divider';
+import { SelectionState } from '../../zustand/SelectionState';
+import { GroupDetailsType } from '../../api/types';
 
 export const AddEditRequestScreen = () => {
   const { navigate } = useNav();
+  const { selectedGroups } = SelectionState();
 
-  const goToAddItem = (type: 'group' | 'member' = 'member') => {
+  const goToAddItem = useCallback((type: 'group' | 'member' = 'member') => {
     navigate('SelectItemScreen', {
       type,
       header: `Select ${type}`,
     });
-  };
+  }, []);
+
+  const renderSelectedGroups = useCallback((item: GroupDetailsType) => {
+    return <ListItemWithImage />;
+  }, []);
 
   return (
     <ScreenWrapper>
@@ -62,6 +69,7 @@ export const AddEditRequestScreen = () => {
             marginTop: 5,
           }}
         />
+        {selectedGroups.map(renderSelectedGroups)}
         <ListItemWithImage />
         <ListItemWithImage />
         <ListItemWithImage />

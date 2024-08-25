@@ -7,7 +7,7 @@ import {
   // Card,
   // IconButton,
   // PayRequestCard,
-  // PlusButton,
+  PlusButton,
   ScreenWrapper,
   TabItemType,
   themedStyles,
@@ -22,7 +22,7 @@ import {
   View,
 } from 'react-native';
 import { commonStyles } from '@styles';
-// import { useNav } from '../../helper';
+import { useNav } from '../../helper';
 
 export const showInProgress = () => {
   Alert.alert(
@@ -46,7 +46,7 @@ export const HomeScreen = () => {
   const {
     themeValues: { colors },
   } = useThemed();
-  // const { navigate } = useNav();
+  const { navigate } = useNav();
 
   const styles = s();
 
@@ -78,9 +78,9 @@ export const HomeScreen = () => {
   //   [styles],
   // );
 
-  // const goToAddNew = () => {
-  //   navigate('AddEditRequestScreen');
-  // };
+  const goToAddNew = () => {
+    navigate('AddEditRequestScreen');
+  };
 
   return (
     <ScreenWrapper style={[{ margin: 0, backgroundColor: colors.primary }]}>

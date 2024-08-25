@@ -11,8 +11,6 @@ import {
 } from './types';
 import { FIREBASE_PATHS } from './FirebasePaths';
 
-const currentUserId = auth().currentUser?.uid?.toString();
-
 export const convertDataToUser = (
   userData: FirebaseFirestoreTypes.DocumentData,
 ) => ({
@@ -21,35 +19,49 @@ export const convertDataToUser = (
   uid: userData?.uid ?? '',
 });
 
-export const getAllUsers: () => Promise<GetUserListApiResponseType> =
-  async () => {
-    try {
-      const users = await firestore().collection('users').get();
-      if (!users?.docs) {
-        return NoReasonErrorResponse;
-      }
-
-      const user = auth().currentUser?.uid;
-
-      const userArr: UserProfileType[] = [];
-      users.forEach((element) => {
-        const userData = element.data();
-        if (element.id !== user) {
-          userArr.push(convertDataToUser(userData));
-        }
-      });
-
-      return {
-        success: true,
-        data: {
-          users: userArr,
-        },
-      };
-    } catch (error) {
-      console.log('🚀 ~  uploadUserProfile error:', error);
+export const getAllUsers: (
+  users?: string[],
+  avoidSelfUser?: boolean,
+) => Promise<GetUserListApiResponseType> = async (
+  usersArray,
+  avoidSelfUser = true,
+) => {
+  try {
+    const currentUserId = auth().currentUser?.uid?.toString();
+    const usersRef = firestore().collection(FIREBASE_PATHS.users);
+    let users;
+    const isConditional = !!usersArray && usersArray.length > 0;
+    if (isConditional) {
+      const finalUsersRef = firestore()
+        .collection(FIREBASE_PATHS.users)
+        .where('uid', 'in', usersArray);
+      users = await finalUsersRef.get();
+    } else {
+      users = await usersRef.get();
+    }
+    if (!users?.docs) {
       return NoReasonErrorResponse;
     }
-  };
+
+    const userArr: UserProfileType[] = [];
+    users.forEach((element) => {
+      const userData = element.data();
+      if (avoidSelfUser ? element.id !== currentUserId : true) {
+        userArr.push(convertDataToUser(userData));
+      }
+    });
+
+    return {
+      success: true,
+      data: {
+        users: userArr,
+      },
+    };
+  } catch (error) {
+    console.log('🚀 ~  getAllUsers error:', error);
+    return NoReasonErrorResponse;
+  }
+};
 
 export const getUsersForFriend: () => Promise<GetUserListApiResponseType> =
   async () => {
@@ -119,7 +131,7 @@ export const getUsersForFriend: () => Promise<GetUserListApiResponseType> =
         },
       };
     } catch (error) {
-      console.log('🚀 ~  uploadUserProfile error:', error);
+      console.log('🚀 ~  getUsersForFriend error:', error);
       return NoReasonErrorResponse;
     }
   };
@@ -153,12 +165,13 @@ export const sendFriendRequest: (
       data: {},
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  sendFriendRequest error:', error);
     return NoReasonErrorResponse;
   }
 };
 
 export const listnerPath = (type: UserListType) => {
+  const currentUserId = auth().currentUser?.uid?.toString();
   const additionalInfoPath = firestore()
     .collection(FIREBASE_PATHS.aditionalInfo)
     .doc(currentUserId);
@@ -173,6 +186,12 @@ export const listnerPath = (type: UserListType) => {
       return additionalInfoPath.collection(FIREBASE_PATHS.blocked_users);
     case 'friends':
       return additionalInfoPath.collection(FIREBASE_PATHS.friends);
+    case 'user_groups':
+      return additionalInfoPath.collection(FIREBASE_PATHS.groups);
+
+    case 'new_users':
+      return firestore().collection(FIREBASE_PATHS.users);
+
     default:
       return additionalInfoPath.collection(FIREBASE_PATHS.sent_req);
   }
@@ -219,7 +238,7 @@ export const getRequests: (
       },
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  getRequests error:', error);
     return NoReasonErrorResponse;
   }
 };
@@ -258,7 +277,7 @@ export const rejectRequest: (
       data: {},
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  rejectRequest error:', error);
     return NoReasonErrorResponse;
   }
 };
@@ -296,7 +315,7 @@ export const blockUser: (friendId: string) => Promise<ResponseType> = async (
       data: {},
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  blockUser error:', error);
     return NoReasonErrorResponse;
   }
 };
@@ -328,7 +347,7 @@ export const unBlockUser: (friendId: string) => Promise<ResponseType> = async (
       data: {},
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  unBlockUser error:', error);
     return NoReasonErrorResponse;
   }
 };
@@ -362,8 +381,6 @@ export const addFriend: (friendId: string) => Promise<ResponseType> = async (
       .doc(user);
 
     await Promise.all([
-      ownDeletionPathRef.delete(),
-      friendDeletionPathRef.delete(),
       await ownAdditionPathRef.set({
         date: new Date(),
         uid: friendId,
@@ -374,12 +391,17 @@ export const addFriend: (friendId: string) => Promise<ResponseType> = async (
       }),
     ]);
 
+    await Promise.all([
+      ownDeletionPathRef.delete(),
+      friendDeletionPathRef.delete(),
+    ]);
+
     return {
       success: true,
       data: {},
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  addFriend error:', error);
     return NoReasonErrorResponse;
   }
 };
@@ -411,7 +433,7 @@ export const removeFriend: (friendId: string) => Promise<ResponseType> = async (
       data: {},
     };
   } catch (error) {
-    console.log('🚀 ~  uploadUserProfile error:', error);
+    console.log('🚀 ~  removeFriend error:', error);
     return NoReasonErrorResponse;
   }
 };

@@ -14,6 +14,7 @@ export type HeaderProps = {
   onPressBack?: () => void;
   style?: BaseTextStyle;
   rightComponent?: React.ReactNode;
+  leftComponent?: React.ReactNode;
 } & Omit<BaseTextProps, 'style'>;
 
 export const Header = (props: HeaderProps) => {
@@ -24,6 +25,7 @@ export const Header = (props: HeaderProps) => {
     onPressBack = () => goBack(),
     style = {},
     rightComponent,
+    leftComponent,
     ...textProps
   } = props;
 
@@ -41,6 +43,7 @@ export const Header = (props: HeaderProps) => {
           onPress={onPressBack}
         />
       )}
+      {leftComponent && leftComponent}
       <BaseText sizeHuge bold {...textProps} style={[styles.textStyle, style]}>
         {title}
       </BaseText>
@@ -56,7 +59,6 @@ const s = () =>
     },
     iconContainerStyle: {
       backgroundColor: colors.inputBackground,
-      alignSelf: 'flex-start',
       padding: 5,
       borderRadius: 10,
     },
@@ -69,5 +71,6 @@ const s = () =>
     },
     textStyle: {
       flex: 1,
+      alignSelf: 'center',
     },
   }));

@@ -1,14 +1,13 @@
-import auth from '@react-native-firebase/auth';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { AuthState, UsersState } from '../zustand';
 import { getUsersForFriend, listnerPath, requestUsersSetter } from './users';
+import { getGroupDetails, groupListnerPaths } from './groups';
+import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { UserGroups } from './types';
 
 export const FirebaseListner = () => {
-  const userId = auth()?.currentUser?.uid;
   const { user } = AuthState();
-  if (!userId) {
-    return null;
-  }
+  const userId = user?.userProfile?.uid;
 
   const {
     setReceivedRequests,
@@ -16,6 +15,9 @@ export const FirebaseListner = () => {
     setNewUsers,
     setBlockedUsers,
     setFriends,
+    userGroups,
+    setUserGroups,
+    setUserGroupsDetails,
   } = UsersState();
 
   const getNewUsers = async () => {
@@ -50,12 +52,36 @@ export const FirebaseListner = () => {
     }
   };
 
+  const getNewGroups = useCallback(async () => {
+    const response = await getGroupDetails();
+    if (response?.success && response?.data?.groups) {
+      setUserGroupsDetails(response?.data?.groups);
+    }
+  }, [userGroups]);
+
+  const setNewGroups = useCallback(
+    (
+      snap: FirebaseFirestoreTypes.QuerySnapshot<FirebaseFirestoreTypes.DocumentData>,
+    ) => {
+      const formatedArray: UserGroups[] = snap.docs.map((_gp) => {
+        const _gpData = _gp?.data();
+        return {
+          id: _gpData?.id,
+          date: _gpData?.date,
+        };
+      });
+      setUserGroups(formatedArray);
+    },
+    [],
+  );
+
   const init = async () => {
     getAndSetSentRequests(true);
     getAndSetReceivedRequests(true);
     getAndSetBlockUsers(true);
     getAndSetFriends(true);
     getNewUsers();
+    // getNewGroups();
   };
 
   useEffect(() => {
@@ -64,8 +90,11 @@ export const FirebaseListner = () => {
     let sentRequestListner: () => void;
     let blockUsersListner: () => void;
     let blockByUsersListner: () => void;
+    let newUsersListner: () => void;
+    let groupListner: () => void;
 
     if (userId) {
+      console.log('calling newone');
       init();
       sentRequestListner = listnerPath('sent_req')?.onSnapshot(
         getAndSetSentRequests.bind(this, false),
@@ -79,8 +108,19 @@ export const FirebaseListner = () => {
       blockUsersListner = listnerPath('blocked_users')?.onSnapshot(
         getAndSetBlockUsers.bind(this, false),
       );
-
+      newUsersListner = listnerPath('new_users').onSnapshot(getNewUsers);
       blockByUsersListner = listnerPath('blocked_by')?.onSnapshot(getNewUsers);
+
+      groupListner = listnerPath('user_groups')?.onSnapshot(setNewGroups);
+      console.log('-----usseelistner', {
+        sent_req: listnerPath('sent_req'),
+        received_req: listnerPath('received_req'),
+        friends: listnerPath('friends'),
+        blocked_users: listnerPath('blocked_users'),
+        new_users: listnerPath('new_users'),
+        blocked_by: listnerPath('blocked_by'),
+        user_groups: listnerPath('user_groups'),
+      });
     }
 
     return () => {
@@ -99,8 +139,30 @@ export const FirebaseListner = () => {
       if (blockByUsersListner) {
         blockByUsersListner();
       }
+      if (newUsersListner) {
+        newUsersListner();
+      }
+      if (groupListner) {
+        groupListner();
+      }
     };
-  }, [userId, user?.userProfile?.uid]);
+  }, [user?.userProfile]);
+
+  useEffect(() => {
+    let groupDetailsListner: () => void;
+    if (userGroups?.length > 0) {
+      groupDetailsListner = groupListnerPaths(
+        userGroups?.map((_) => _.id),
+      ).onSnapshot(getNewGroups);
+    } else {
+      setUserGroupsDetails([]);
+    }
+    return () => {
+      if (groupDetailsListner) {
+        groupDetailsListner();
+      }
+    };
+  }, [userGroups]);
 
   return null;
 };

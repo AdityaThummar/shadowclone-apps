@@ -6,3 +6,5 @@ export * from './NotificationsScreen';
 export * from './AddEditRequestScreen';
 export * from './SelectItemScreen';
 export * from './EditProfileScreen';
+export * from './ChatListScreen';
+export * from './ViewProfileScreen';

@@ -1,7 +1,7 @@
 import { configureStorage } from '@zustand';
 import { create } from 'zustand';
 import { persist, PersistOptions } from 'zustand/middleware';
-import { UserProfileType } from '../api/types';
+import { GroupDetailsType, UserGroups, UserProfileType } from '../api/types';
 
 type Users = UserProfileType[];
 type UsersSetter = (users: Users) => void;
@@ -12,11 +12,15 @@ export type UsersState = {
   friends: Users;
   newUsers: Users;
   blockedUsers: Users;
+  userGroups: UserGroups[];
+  userGroupsDetails: GroupDetailsType[];
   setSentRequests: UsersSetter;
   setReceivedRequests: UsersSetter;
   setFriends: UsersSetter;
   setNewUsers: UsersSetter;
   setBlockedUsers: UsersSetter;
+  setUserGroups: (group: UserGroups[]) => void;
+  setUserGroupsDetails: (details: GroupDetailsType[]) => void;
   clearState: () => void;
 };
 
@@ -26,6 +30,8 @@ const initialStates = {
   sentRequest: [],
   newUsers: [],
   blockedUsers: [],
+  userGroups: [],
+  userGroupsDetails: [],
 };
 
 export const UsersState = create(
@@ -41,6 +47,10 @@ export const UsersState = create(
         setNewUsers: (users: Users) => set({ ...get(), newUsers: users }),
         setBlockedUsers: (users: Users) =>
           set({ ...get(), blockedUsers: users }),
+        setUserGroups: (groups: UserGroups[]) =>
+          set({ ...get(), userGroups: groups }),
+        setUserGroupsDetails: (groups: GroupDetailsType[]) =>
+          set({ ...get(), userGroupsDetails: groups }),
         clearState: () => set({ ...get(), ...initialStates }),
       };
     },

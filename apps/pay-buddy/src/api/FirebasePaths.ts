@@ -6,4 +6,5 @@ export const FIREBASE_PATHS = {
   blocked_by: 'blocked_by',
   blocked_users: 'blocked_users',
   friends: 'friends',
+  groups: 'groups',
 };

@@ -11,3 +11,4 @@ export * from './TopTabs';
 export * from './Card';
 export * from './Scroll';
 export * from './BaseStatusBar';
+export * from './NotificationCounts';

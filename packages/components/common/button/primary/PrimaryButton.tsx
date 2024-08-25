@@ -3,6 +3,7 @@ import { BaseText } from '../../text';
 import { PrimaryButtonProps } from './types';
 import { Touchable } from '../../Touchable';
 import { themedStyles } from '../../wrapper';
+import { hp, wp } from '@styles';
 
 export const PrimaryButton = (props: PrimaryButtonProps) => {
   const { titleProps, title, titleStyle, ...otherProps } = props;
@@ -26,7 +27,7 @@ const s = () =>
   themedStyles(({ colors }) => ({
     container: {
       backgroundColor: colors.tint,
-      padding: 10,
+      padding: hp(1.4),
       borderRadius: 15,
       alignItems: 'center',
       shadowColor: colors.secondary,
@@ -37,7 +38,8 @@ const s = () =>
       shadowOpacity: 0.2,
       shadowRadius: 3,
       elevation: 2,
-      margin: 5,
+      marginHorizontal: wp(4),
+      marginVertical: hp(0.5),
     },
     titleStyle: {
       color: colors.primary,

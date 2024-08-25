@@ -6,9 +6,11 @@ import {
 import { StackScreenProps } from './types';
 import {
   AddEditRequestScreen,
+  ChatListScreen,
   EditProfileScreen,
   SelectItemScreen,
   SocialLoginScreen,
+  ViewProfileScreen,
 } from '../screens';
 import { useThemed } from '@components';
 import { BottomTabNavigator } from './BottomTabNavigator';
@@ -57,6 +59,8 @@ export const StackNavigation = () => {
         component={EditProfileScreen}
         initialParams={{ type: 'new-profile', userData: undefined }}
       />
+      <NStack.Screen name='ChatListScreen' component={ChatListScreen} />
+      <NStack.Screen name='ViewProfileScreen' component={ViewProfileScreen} />
     </NStack.Navigator>
   );
 };

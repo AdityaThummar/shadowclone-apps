@@ -19,7 +19,7 @@ import { UsersState } from '../../zustand';
 
 export const SettingsScreen = () => {
   const navigation = useNav();
-  const { setUser, user, clearUser } = AuthState();
+  const { user, clearUser } = AuthState();
   const { clearState } = UsersState();
   const { setLoader } = LoadingState();
 
@@ -32,9 +32,11 @@ export const SettingsScreen = () => {
   }, [setTheme, theme]);
 
   const initLogout = useCallback(async () => {
-    setUser(undefined);
-    clearState();
     setLoader('Clearing creds');
+    clearState();
+    await logout();
+    await GoogleSignin.signOut();
+    clearUser();
     navigation.reset({
       index: 0,
       routes: [
@@ -43,15 +45,18 @@ export const SettingsScreen = () => {
         },
       ],
     });
-    await logout();
-    await GoogleSignin.signOut();
     setLoader();
-  }, [setUser, clearState]);
+  }, [user]);
 
-  const deleteAccount = async () => {
+  const deleteAccount = useCallback(async () => {
     try {
       setLoader('Deleting profile');
       await deleteUserAccount();
+    } catch (error) {
+      console.log('🚀 ~ deleteAccount ~ error:', error);
+    } finally {
+      clearState();
+      clearUser();
       navigation.reset({
         index: 0,
         routes: [
@@ -61,14 +66,8 @@ export const SettingsScreen = () => {
         ],
       });
       setLoader();
-    } catch (error) {
-      setLoader();
-      console.log('🚀 ~ deleteAccount ~ error:', error);
-    } finally {
-      clearUser();
-      clearState();
     }
-  };
+  }, [user]);
 
   const confirmDelete = () => {
     Alert.alert(
@@ -122,9 +121,11 @@ export const SettingsScreen = () => {
           <BaseText bold sizeHugeExtra numberOfLines={2}>
             {user?.userProfile?.name}
           </BaseText>
-          <BaseText semibold sizeMedium numberOfLines={2}>
-            {user?.userProfile?.bio}
-          </BaseText>
+          {user?.userProfile?.bio && (
+            <BaseText semibold sizeMedium numberOfLines={2}>
+              {user?.userProfile?.bio}
+            </BaseText>
+          )}
         </View>
       </Card>
       <PrimaryButton title='Edit Account' onPress={goToEditProfile} />

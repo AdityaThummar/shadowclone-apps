@@ -47,7 +47,7 @@ export const configureThemeState = (resources: ResourceType) =>
           },
         };
       },
-      configureStorage('Theme') as PersistOptions<
+      configureStorage('ThemeState') as PersistOptions<
         ThemeStateType,
         ThemeStateType
       >,

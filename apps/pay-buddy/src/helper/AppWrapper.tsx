@@ -29,8 +29,7 @@ export const AppWrapper = ({ children }: React.PropsWithChildren) => {
           'android.permission.POST_NOTIFICATIONS',
         );
       }
-      const tokenResponse = await Notifications.getExpoPushTokenAsync();
-      console.log('🚀 ~ onFetchUpdateAsync ~ tokenResponse:', tokenResponse);
+      await Notifications.getExpoPushTokenAsync();
     } catch (error) {
       setLoader();
       // You can also add an alert() to see the error message in case of an error when fetching updates.

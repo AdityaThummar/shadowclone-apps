@@ -1,19 +1,25 @@
-import React, { useCallback } from 'react';
-import { ActivityIndicator, FlatList } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  GestureResponderEvent,
+} from 'react-native';
 import { Card } from '../Card';
 import { commonStyles, hp, wp } from '@styles';
 import { themedStyles, useThemed } from '../wrapper';
 import { BaseText } from '../text';
 import { Divider } from '../Divider';
-import { IconButton, TextButton } from '../button';
+import { BaseIcon, IconButton, PrimaryButton, TextButton } from '../button';
 import { Input, InputProps } from '../Input';
 import { UserProfileType } from 'apps/pay-buddy/src/api/types';
 import { Avatar } from '../image';
 import { ViewStyles } from '@types';
+import { AuthState } from 'apps/pay-buddy/src/zustand';
+import { useNav } from 'apps/pay-buddy/src/helper';
 
 export type UserCardActionType = {
   title: string;
-  onPress?: () => void;
+  onPress?: (item?: UserProfileType) => void;
 };
 
 export type UserCardhalfProps = {
@@ -24,9 +30,11 @@ export type UserCardhalfProps = {
   inputProps?: InputProps;
   isSelection?: boolean;
   selected?: boolean;
-  item?: UserProfileType;
+  item: UserProfileType;
   isLoading?: boolean;
   containerStyle?: ViewStyles;
+  onSelect?: (user: UserProfileType) => void;
+  isAdmin?: boolean;
 };
 
 export const UserCardHalf = (props: UserCardhalfProps) => {
@@ -41,18 +49,29 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
     item,
     isLoading = false,
     containerStyle = {},
+    onSelect,
+    isAdmin = false,
   } = props;
 
+  const { push } = useNav();
   const {
     themeValues: { colors },
   } = useThemed();
+  const { user } = AuthState();
   const styles = s();
 
   const renderActions = useCallback(
-    ({ item }: { item: UserCardActionType }) => {
+    (_item: { item: UserCardActionType }) => {
+      const { onPress = () => {}, ...otherProps } = _item.item;
+
+      const onPressHandler = (_?: GestureResponderEvent) => {
+        _item?.item.onPress && _item?.item?.onPress(item);
+      };
+
       return (
         <TextButton
-          {...item}
+          {...otherProps}
+          onPress={onPressHandler}
           containerStyle={{
             justifyContent: 'center',
           }}
@@ -61,17 +80,31 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
         />
       );
     },
-    [],
+    [item],
   );
+
+  const isSelfUser = useMemo(
+    () => user?.userProfile?.uid === item?.uid,
+    [user?.userProfile?.uid, item?.uid],
+  );
+
+  const onPressUser = useCallback(() => {
+    push('ViewProfileScreen', { group: false, profileDetails: item });
+  }, [item]);
 
   return (
     <Card
       style={[
         commonStyles.flex,
         styles.container,
+        isAdmin && {
+          paddingBottom: hp(4),
+          marginBottom: hp(2),
+        },
         containerStyle,
         isSelection && selected ? styles.selectedStyle : {},
       ]}
+      onPress={onPressUser}
     >
       {isSelection && selected && (
         <IconButton
@@ -86,7 +119,7 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
       )}
       <Avatar uri={item?.image} />
       <BaseText semibold sizeMedium center numberOfLines={2}>
-        {item?.name}
+        {isSelfUser ? 'You' : item?.name}
       </BaseText>
       {isLoading ? (
         <ActivityIndicator
@@ -98,7 +131,7 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
         />
       ) : (
         <>
-          {!!actions && actions.length > 0 && !isSelection && (
+          {!isSelfUser && !!actions && actions.length > 0 && !isSelection && (
             <>
               <FlatList
                 data={actions}
@@ -115,7 +148,14 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
           {isSelection && (
             <>
               <Divider />
-              <TextButton title={selected ? 'Remove' : 'Select'} />
+              <TextButton
+                title={selected ? 'Remove' : 'Select'}
+                {...(onSelect
+                  ? {
+                      onPress: onSelect.bind(this, item),
+                    }
+                  : {})}
+              />
             </>
           )}
           {input && (
@@ -132,6 +172,26 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
           )}
         </>
       )}
+      {isAdmin && (
+        <Card
+          style={[
+            commonStyles.rowItemCenterJustifyCenter,
+            commonStyles.center,
+            {
+              gap: wp(0.5),
+              paddingHorizontal: wp(4),
+              position: 'absolute',
+              bottom: -hp(2),
+              paddingVertical: hp(1),
+            },
+          ]}
+        >
+          <BaseIcon name='ribbon' color={colors.tint} size={20} />
+          <BaseText sizeTinyExtra semibold style={{ color: colors.tint }}>
+            Admin
+          </BaseText>
+        </Card>
+      )}
     </Card>
   );
 };
@@ -142,6 +202,7 @@ const s = () =>
       gap: 5,
       maxWidth: wp(45),
       minWidth: wp(40),
+      alignSelf: 'flex-start',
     },
     bioContainer: {
       height: 40,

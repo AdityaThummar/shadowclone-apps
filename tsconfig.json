@@ -25,6 +25,9 @@
       "@zustand": [
         "./packages/zustand/index.ts"
       ],
+      "@hooks": [
+        "./packages/hooks/index.ts"
+      ],
     },
   },
 }

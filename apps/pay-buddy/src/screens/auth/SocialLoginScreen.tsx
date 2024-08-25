@@ -58,7 +58,7 @@ export const SocialLoginScreen = () => {
         source={Logos.PayBuddyLogo}
         style={{
           height: hp(35),
-          width: wp(90),
+          width: wp(75),
           alignSelf: 'center',
           // backgroundColor: 'red',
           transform: [

@@ -51,10 +51,6 @@ const App = () => {
       const tokenResponse = await Notifications.getExpoPushTokenAsync({
         projectId: EXPO_PROJECT_ID,
       });
-      console.log(
-        '🚀 ~ configureNotifications ~ tokenResponse:',
-        tokenResponse,
-      );
     } catch (error) {
       console.log('🚀 ~ configureNotifications ~ error:', error);
     }

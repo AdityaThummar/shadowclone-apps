@@ -24,23 +24,24 @@ type SectionType = {
   data: unknown[];
 };
 
+export const removeRequest = async (friendId: string) => {
+  return await rejectRequest(friendId, false);
+};
+
+export const acceptFriend = async (friendId: string) => {
+  return await addFriend(friendId);
+};
+
 export const NotificationsScreen = () => {
   const { receivedRequests } = UsersState();
 
   const styles = s();
 
-  const removeRequest = async (friendId: string) => {
-    await rejectRequest(friendId, false);
-  };
-  const acceptFriend = async (friendId: string) => {
-    await addFriend(friendId);
-  };
-
   const renderUsers = useCallback(({ item }: { item: UserProfileType }) => {
     return (
       <UserCardHalf
         actions={[
-          { title: 'Add', onPress: acceptFriend.bind(this, item?.uid) },
+          { title: 'Accept', onPress: acceptFriend.bind(this, item?.uid) },
           { title: 'Remove', onPress: removeRequest.bind(this, item?.uid) },
         ]}
         item={item}

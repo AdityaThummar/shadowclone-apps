@@ -12,14 +12,19 @@ export type PayRequestCardProps = {
   data?: PayRequestItemType;
   isOwn: boolean;
   isPaid: boolean;
+  allPaid: boolean;
 };
 
 export const PayRequestCard = (props: PayRequestCardProps) => {
-  const { containerStyle, data, isOwn = false, isPaid = false } = props;
+  const {
+    containerStyle,
+    data,
+    isOwn = false,
+    isPaid = false,
+    allPaid = false,
+  } = props;
 
   const styles = s();
-
-  const allPaid = isOwn && Math.random() < 0.5;
 
   return (
     <Card

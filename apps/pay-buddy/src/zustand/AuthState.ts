@@ -4,7 +4,7 @@ import { persist, PersistOptions } from 'zustand/middleware';
 import { UserData } from '../api/types';
 
 export type AuthStateTypes = {
-  user?: UserData;
+  user?: UserData | null;
   setUser: (user?: UserData) => void;
   clearUser: () => void;
 };
@@ -12,21 +12,25 @@ export type AuthStateTypes = {
 export const AuthState = create(
   persist<AuthStateTypes>(
     (set: (props: AuthStateTypes) => void, get: () => AuthStateTypes) => {
+      const setUser = (u?: UserData) =>
+        set({
+          ...get(),
+          user: u,
+        });
+
+      const clearUser = () =>
+        set({
+          ...get(),
+          setUser,
+          user: null,
+        });
+
       return {
-        user: undefined,
-        setUser: (u?: UserData) =>
-          set({
-            ...get(),
-            user: u,
-          }),
-        clearUser: () => {
-          set({
-            ...get(),
-            user: undefined,
-          });
-        },
+        user: null,
+        setUser,
+        clearUser,
       };
     },
-    configureStorage('Theme') as PersistOptions<AuthStateTypes>,
+    configureStorage('AuthState') as PersistOptions<AuthStateTypes>,
   ),
 );
