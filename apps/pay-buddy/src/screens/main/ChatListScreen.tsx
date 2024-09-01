@@ -9,15 +9,27 @@ import {
   useThemed,
 } from '@components';
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { RootRouteProps, useNav } from '../../helper';
 import { hp, wp } from '@styles';
 import { View } from 'react-native';
+import { AuthState } from '../../zustand';
+import { RequestState } from '../../zustand/RequestState';
+import {
+  PayRequestItemAPIPaylod,
+  PayRequestItemType,
+  updateRequest,
+} from '../../api/payRequests';
+import { LoadingState } from '@zustand';
 
 export const ChatListScreen = () => {
   const { params } = useRoute<RootRouteProps<'ChatListScreen'>>();
   const group = params?.group;
   const data = params?.data;
+
+  const { user } = AuthState();
+  const { requests, selfRequests } = RequestState();
+  const { setLoader } = LoadingState();
 
   const { navigate } = useNav();
   const {
@@ -30,21 +42,28 @@ export const ChatListScreen = () => {
   );
 
   const renderChatItem = useCallback(
-    (self = false, isallPaid = false, isPaid = false) => {
+    (_item: PayRequestItemType) => {
+      const isOwn = _item.created_by?.uid === user?.userProfile?.uid;
+      const isPaid =
+        !isOwn &&
+        !!_item.paidMembers &&
+        _item.paidMembers?.findIndex(
+          (_pm) => _pm?.uid === user?.userProfile?.uid,
+        ) !== -1;
+
       return (
         <PayRequestCard
           containerStyle={{
             width: wp(85),
-            alignSelf: self ? 'flex-end' : 'flex-start',
-            marginVertical: hp(self ? 3 : 1),
+            alignSelf: isOwn ? 'flex-end' : 'flex-start',
           }}
-          isOwn={self}
-          allPaid={isallPaid}
+          data={_item}
+          isOwn={isOwn}
           isPaid={isPaid}
         />
       );
     },
-    [],
+    [user],
   );
 
   const goToInfo = useCallback(() => {
@@ -65,6 +84,20 @@ export const ChatListScreen = () => {
     [],
   );
 
+  const goToCreateNew = useCallback(() => {
+    navigate('AddEditRequestScreen');
+  }, []);
+
+  const allRequests = useMemo(
+    () =>
+      [...requests, ...selfRequests]?.filter(
+        (_item) =>
+          _item.groups &&
+          _item?.groups?.findIndex((_gp) => _gp.id === data?.id) !== -1,
+      ),
+    [data, requests, selfRequests],
+  );
+
   return (
     <ScreenWrapper>
       <Header
@@ -72,22 +105,13 @@ export const ChatListScreen = () => {
         title={data?.name}
         rightComponent={renderRightComponent()}
       />
-      <Scroll autoScrollBottom>
-        {renderChatItem(false, false, true)}
-        {renderChatItem(false, false)}
-        {renderChatItem(true, true)}
-        {renderChatItem()}
-        {renderChatItem(false, false, true)}
-        {renderChatItem(true)}
-        {renderChatItem()}
-        {renderChatItem(false, false, true)}
-        {renderChatItem(false, false, true)}
-      </Scroll>
+      <Scroll autoScrollBottom>{allRequests?.map(renderChatItem)}</Scroll>
       <PrimaryButton
         title='Create new request'
         style={{
           marginTop: hp(2),
         }}
+        onPress={goToCreateNew}
       />
     </ScreenWrapper>
   );

@@ -5,7 +5,11 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type StackScreenProps = {
   SocialLogin: undefined;
   BottomTab: NavigatorScreenParams<BottomTabScreens>;
-  AddEditRequestScreen: undefined;
+  AddEditRequestScreen?: {
+    viewOnly?: boolean;
+    id?: string;
+    edit?: boolean;
+  };
   SelectItemScreen?: {
     type?: SearchScreenListTypes;
     header?: string;

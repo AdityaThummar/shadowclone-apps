@@ -91,10 +91,7 @@ export const BottomTabNavigator = () => {
   }, []);
 
   return (
-    <BottomTab.Navigator
-      screenOptions={screenOptions}
-      initialRouteName='Groups'
-    >
+    <BottomTab.Navigator screenOptions={screenOptions} initialRouteName='Home'>
       <BottomTab.Screen
         name='Home'
         options={{

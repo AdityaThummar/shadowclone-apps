@@ -1,14 +1,19 @@
 import React, {
+  useCallback,
+  useMemo,
   // useCallback,
   useState,
 } from 'react';
 import {
   BaseText,
+  NoData,
+  PayRequestCard,
   // Card,
   // IconButton,
   // PayRequestCard,
   PlusButton,
   ScreenWrapper,
+  Scroll,
   TabItemType,
   themedStyles,
   TopTabs,
@@ -23,6 +28,9 @@ import {
 } from 'react-native';
 import { commonStyles } from '@styles';
 import { useNav } from '../../helper';
+import { RequestState } from '../../zustand/RequestState';
+import { PayRequestItemType } from '../../api/payRequests';
+import { AuthState } from '../../zustand';
 
 export const showInProgress = () => {
   Alert.alert(
@@ -47,6 +55,8 @@ export const HomeScreen = () => {
     themeValues: { colors },
   } = useThemed();
   const { navigate } = useNav();
+  const { user } = AuthState();
+  const { requests, selfRequests } = RequestState();
 
   const styles = s();
 
@@ -82,6 +92,49 @@ export const HomeScreen = () => {
     navigate('AddEditRequestScreen');
   };
 
+  const renderRequests = useCallback(
+    (_request: PayRequestItemType) => {
+      const isOwn = _request?.created_by?.uid === user?.userProfile?.uid;
+      const isPaid =
+        !isOwn &&
+        !!_request?.paidMembers &&
+        _request?.paidMembers?.findIndex(
+          (_pm) => _pm.uid === user?.userProfile?.uid,
+        ) !== -1;
+
+      return <PayRequestCard data={_request} isOwn={isOwn} isPaid={isPaid} />;
+    },
+    [user?.userProfile],
+  );
+
+  const allRequests = useMemo(() => {
+    switch (selectedTab.name) {
+      case 'Pending':
+        return [...requests]?.filter(
+          (_pi) =>
+            !_pi.paidMembers ||
+            _pi.paidMembers?.findIndex(
+              (_pm) => _pm.uid === user?.userProfile?.uid,
+            ) === -1,
+        );
+
+      case 'Paid':
+        return [...requests]?.filter(
+          (_pi) =>
+            _pi.paidMembers &&
+            _pi.paidMembers?.findIndex(
+              (_pm) => _pm.uid === user?.userProfile?.uid,
+            ) !== -1,
+        );
+
+      case "Your's":
+        return selfRequests;
+
+      default:
+        return [...requests, ...selfRequests];
+    }
+  }, [requests, selfRequests, selectedTab, user?.userProfile]);
+
   return (
     <ScreenWrapper style={[{ margin: 0, backgroundColor: colors.primary }]}>
       <View style={[commonStyles.rowItemsCenter, styles.topContainer]}>
@@ -91,12 +144,12 @@ export const HomeScreen = () => {
           onPressTab={setSelectedTab}
           style={[commonStyles.flex]}
         />
-        {/* <PlusButton
+        <PlusButton
           containerStyle={[{ marginRight: 20 }]}
           onPress={goToAddNew}
-        /> */}
+        />
       </View>
-      <ScreenWrapper style={[commonStyles.centerCenter, { marginTop: 0 }]}>
+      <ScreenWrapper>
         {/* <Card>
           <BaseText semibold center>
             {`All these are just a skeleton components that we will develop in upmost version, For now just know and enjoy this demo app we allow you to access.Thank you for using this App 🙂`}
@@ -113,6 +166,14 @@ export const HomeScreen = () => {
           <PayRequestCard />
           <PayRequestCard />
         </ScrollView> */}
+
+        {allRequests && allRequests.length > 0 ? (
+          <Scroll>{allRequests.map(renderRequests)}</Scroll>
+        ) : (
+          <View style={[commonStyles.flex, commonStyles.centerCenter]}>
+            <NoData />
+          </View>
+        )}
 
         {/* <Input style={{ marginTop: 10 }} /> */}
         {/* <SectionList
@@ -142,9 +203,6 @@ export const HomeScreen = () => {
             paddingBottom: 15,
           }}
         /> */}
-        <BaseText regular sizeRegular>
-          No Data
-        </BaseText>
       </ScreenWrapper>
     </ScreenWrapper>
   );

@@ -24,26 +24,30 @@ import { UserProfileType } from '../../api/types';
 import { KeyboardListner } from '../../components';
 import { commonStyles, hp, wp } from '@styles';
 import { useNav } from '../../helper';
-import { UsersState } from '../../zustand';
+import { AuthState, UsersState } from '../../zustand';
 import { SelectionState } from '../../zustand/SelectionState';
 
 export type SearchScreenListTypes =
-  | 'group'
   | 'member'
   | 'sent_req'
   | 'blocked_users'
   | 'friends'
-  | 'select_new_member';
+  | 'select_new_member'
+  | 'select_groups'
+  | 'select_req_members';
 
 export type SearchScreenProps = {
   type?: SearchScreenListTypes;
 };
 
 export const SearchScreen = (props: SearchScreenProps) => {
+  console.log('🚀 ~ SearchScreen ~ props:', props);
   const { type = 'member' } = props;
   const { navigate, goBack } = useNav();
-  const { sentRequest, newUsers, blockedUsers, friends } = UsersState();
-  const { selectedMemebersForNew, setSelectedMemebersForNew } =
+  const { user } = AuthState();
+  const { sentRequest, newUsers, blockedUsers, friends, userGroupsDetails } =
+    UsersState();
+  const { selectedGroups, selectedMemebersForNew, setSelectedMemebersForNew } =
     SelectionState();
 
   const styles = s();
@@ -147,6 +151,7 @@ export const SearchScreen = (props: SearchScreenProps) => {
 
   const hideBack = useMemo(() => type === 'member', [type]);
   const hideSearch = useMemo(() => !['member'].includes(type), [type]);
+
   const searchedArray: UserProfileType[] = useMemo(() => {
     const stext = searchText?.toLowerCase();
     const arr = newUsers?.filter((_item) =>
@@ -156,6 +161,25 @@ export const SearchScreen = (props: SearchScreenProps) => {
     if (searchText) {
       return arr;
     }
+
+    const reqMembers: UserProfileType[] = [...friends];
+    const allGroupsMember: UserProfileType[] = [];
+
+    userGroupsDetails
+      ?.map((_gp) => {
+        const isIn = selectedGroups?.findIndex((_i) => _i.id === _gp.id) !== -1;
+        if (isIn) {
+          allGroupsMember.push(..._gp.member);
+        }
+      })
+      .flat(1);
+
+    allGroupsMember?.forEach((_member) => {
+      const isIn = reqMembers?.findIndex((_i) => _i.uid === _member.uid) !== -1;
+      if (!isIn && _member.uid != user?.userProfile?.uid) {
+        reqMembers.push(_member);
+      }
+    });
 
     switch (type) {
       case 'member':
@@ -168,18 +192,28 @@ export const SearchScreen = (props: SearchScreenProps) => {
         return sentRequest ?? [];
       case 'select_new_member':
         return friends ?? [];
+      case 'select_req_members':
+        return [...reqMembers];
 
       default:
         return [];
     }
-  }, [searchText, newUsers, sentRequest, blockedUsers, type]);
+  }, [
+    searchText,
+    newUsers,
+    sentRequest,
+    blockedUsers,
+    type,
+    userGroupsDetails,
+  ]);
+
   const dynamicTitle = useMemo(() => {
     switch (type) {
       case 'friends':
         return 'Your Friends';
       case 'blocked_users':
         return 'Blocked users';
-      case 'group':
+      case 'select_groups':
         return 'Select Groups';
       case 'member':
         return 'Find People';
@@ -190,7 +224,11 @@ export const SearchScreen = (props: SearchScreenProps) => {
         return 'Select Members';
     }
   }, [type, sentRequest]);
-  const isSelect = useMemo(() => ['select_new_member'].includes(type), [type]);
+
+  const isSelect = useMemo(
+    () => ['select_new_member', 'select_req_members'].includes(type),
+    [type],
+  );
 
   const renderUsers = useCallback(
     (item: { item: UserProfileType; index: number }) => {
@@ -231,7 +269,7 @@ export const SearchScreen = (props: SearchScreenProps) => {
         title={`${dynamicTitle}${
           searchedArray.length > 0 && !hideBack
             ? ` (${
-                type === 'select_new_member'
+                ['select_new_member', 'select_req_member'].includes(type)
                   ? selectedMemebersForNew.length - 1
                   : searchedArray.length
               })`

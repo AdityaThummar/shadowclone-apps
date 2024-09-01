@@ -1,14 +1,32 @@
 import { useCallback, useEffect } from 'react';
 import { AuthState, UsersState } from '../zustand';
-import { getUsersForFriend, listnerPath, requestUsersSetter } from './users';
+import {
+  getAllUsers,
+  getUsersForFriend,
+  listnerPath,
+  requestUsersSetter,
+} from './users';
 import { getGroupDetails, groupListnerPaths } from './groups';
 import { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-import { UserGroups } from './types';
+import { GroupDetailsType, UserGroups, UserProfileType } from './types';
+import {
+  PayRequestItemAPIPaylod,
+  PayRequestItemType,
+  payRequestListnerPath,
+  selfPayRequestListnerPath,
+} from './payRequests';
+import { RequestState } from '../zustand/RequestState';
 
 export const FirebaseListner = () => {
   const { user } = AuthState();
-  const userId = user?.userProfile?.uid;
-
+  const {
+    blockedUsers,
+    friends,
+    newUsers,
+    receivedRequests,
+    sentRequest,
+    userGroupsDetails,
+  } = UsersState();
   const {
     setReceivedRequests,
     setSentRequests,
@@ -19,6 +37,9 @@ export const FirebaseListner = () => {
     setUserGroups,
     setUserGroupsDetails,
   } = UsersState();
+  const { setRequests, setSelfRequests } = RequestState();
+
+  const userId = user?.userProfile?.uid;
 
   const getNewUsers = async () => {
     const response = await getUsersForFriend();
@@ -73,6 +94,136 @@ export const FirebaseListner = () => {
       setUserGroups(formatedArray);
     },
     [],
+  );
+
+  const getNewPayRequests = useCallback(
+    async (
+      self = false,
+      snap: FirebaseFirestoreTypes.QuerySnapshot<FirebaseFirestoreTypes.DocumentData>,
+    ) => {
+      const allRequestsRow: PayRequestItemAPIPaylod[] = snap.docs.map(
+        (_p) => _p.data() as PayRequestItemAPIPaylod,
+      );
+      const allMembersRow: string[] = allRequestsRow
+        .map((_pi) => [..._pi.members, _pi.created_by])
+        .flat(1);
+      const allGroupsRow: string[] = allRequestsRow
+        .map((_pi) => _pi.groups)
+        .flat(1);
+
+      const uniqueMembers: string[] = [];
+      const uniqueGroups: string[] = [];
+
+      allMembersRow.map((_am) => {
+        const isIncluded =
+          uniqueMembers?.findIndex((_um) => _um === _am) !== -1;
+        if (!isIncluded) {
+          uniqueMembers.push(_am);
+        }
+      });
+
+      allGroupsRow.map((_am) => {
+        const isIncluded = uniqueGroups?.findIndex((_um) => _um === _am) !== -1;
+        if (!isIncluded) {
+          uniqueGroups.push(_am);
+        }
+      });
+
+      const userprofiles: UserProfileType[] = [];
+      const groupDetails: GroupDetailsType[] = [];
+
+      const unListedProfiles: string[] = [];
+      const unListedGroups: string[] = [];
+
+      const totalKnownUsers = [
+        ...blockedUsers,
+        ...friends,
+        ...newUsers,
+        ...receivedRequests,
+        ...sentRequest,
+      ];
+      if (user?.userProfile) {
+        totalKnownUsers.push(user?.userProfile);
+      }
+
+      uniqueMembers?.map((_um) => {
+        const isKnownItem = totalKnownUsers?.find((_tku) => _tku.uid === _um);
+        if (isKnownItem && Object.keys(isKnownItem).length !== 0) {
+          userprofiles?.push(isKnownItem);
+        } else {
+          unListedProfiles.push(_um);
+        }
+      });
+
+      uniqueGroups?.map((_um) => {
+        const isKnownItem = userGroupsDetails?.find((_tku) => _tku.id === _um);
+        if (isKnownItem && Object.keys(isKnownItem).length !== 0) {
+          groupDetails?.push(isKnownItem);
+        } else {
+          unListedGroups.push(_um);
+        }
+      });
+
+      if (unListedProfiles?.length > 0) {
+        const unListedUserResponse = await getAllUsers(unListedProfiles, true);
+        unListedProfiles?.map((_ulp) => {
+          const userGet = unListedUserResponse?.data?.users?.find(
+            (_u) => _u.uid === _ulp,
+          );
+          if (userGet && Object.keys(userGet).length > 0) {
+            userprofiles?.push(userGet);
+          }
+        });
+      }
+      if (unListedGroups?.length > 0) {
+        const unListedGroupsResponse = await getGroupDetails(unListedGroups);
+        unListedGroups?.map((_ulp) => {
+          const groupGet = unListedGroupsResponse?.data?.groups?.find(
+            (_u) => _u.id === _ulp,
+          );
+          if (groupGet && Object.keys(groupGet).length > 0) {
+            groupDetails?.push(groupGet);
+          }
+        });
+      }
+
+      const userRequestDetails: PayRequestItemType[] = allRequestsRow?.map(
+        (_rowreq) => {
+          const members = _rowreq?.members?.map(
+            (__rm) =>
+              userprofiles?.find((_up) => _up.uid === __rm) as UserProfileType,
+          );
+          const paidMembers = _rowreq?.paidMembers?.map(
+            (__rm) =>
+              userprofiles?.find((_up) => _up.uid === __rm) as UserProfileType,
+          );
+          const groups = _rowreq?.groups?.map(
+            (__rm) =>
+              groupDetails?.find((_gd) => _gd.id === __rm) as GroupDetailsType,
+          );
+          const created_by = userprofiles?.find(
+            (_up) => _up.uid === _rowreq.created_by,
+          ) as UserProfileType;
+
+          const _item: PayRequestItemType = {
+            ..._rowreq,
+            members,
+            groups,
+            id: _rowreq?.id ?? '',
+            created_by,
+            paidMembers: paidMembers,
+          };
+          return _item;
+        },
+      );
+
+      if (self) {
+        setSelfRequests(userRequestDetails);
+      } else {
+        setRequests(userRequestDetails);
+      }
+    },
+    [user, blockedUsers, friends, newUsers, receivedRequests, sentRequest],
   );
 
   const init = async () => {
@@ -163,6 +314,31 @@ export const FirebaseListner = () => {
       }
     };
   }, [userGroups]);
+
+  useEffect(() => {
+    let userRequests: () => void;
+    let userSelfRequests: () => void;
+
+    if (user?.userProfile?.uid) {
+      userRequests = payRequestListnerPath(user?.userProfile?.uid).onSnapshot(
+        getNewPayRequests.bind(this, false),
+      );
+
+      userSelfRequests = selfPayRequestListnerPath(
+        user?.userProfile?.uid,
+      ).onSnapshot(getNewPayRequests.bind(this, true));
+    } else {
+      setRequests([]);
+    }
+    return () => {
+      if (userRequests) {
+        userRequests();
+      }
+      if (userSelfRequests) {
+        userSelfRequests();
+      }
+    };
+  }, [user?.userProfile]);
 
   return null;
 };

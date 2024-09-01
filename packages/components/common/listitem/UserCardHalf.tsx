@@ -19,15 +19,21 @@ import { useNav } from 'apps/pay-buddy/src/helper';
 
 export type UserCardActionType = {
   title: string;
-  onPress?: (item?: UserProfileType) => void;
+  onPress?: (item: UserProfileType) => void;
 };
 
 export type UserCardhalfProps = {
   actions?: UserCardActionType[];
   avatarSize?: 'small' | 'big';
   input?: boolean;
+  value?: string;
   onChangeText?: (t: string) => void;
-  inputProps?: InputProps;
+  onClearInput?: () => void;
+  onBlurInput?: () => void;
+  inputProps?: Omit<
+    InputProps,
+    'value' | 'onChangeText' | 'onClear' | 'onBlurInput'
+  >;
   isSelection?: boolean;
   selected?: boolean;
   item: UserProfileType;
@@ -43,6 +49,9 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
     avatarSize = 'big',
     input = false,
     onChangeText = () => {},
+    onClearInput = () => {},
+    onBlurInput = () => {},
+    value = '',
     inputProps = {},
     isSelection = false,
     selected = false,
@@ -121,6 +130,19 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
       <BaseText semibold sizeMedium center numberOfLines={2}>
         {isSelfUser ? 'You' : item?.name}
       </BaseText>
+      {input && (
+        <>
+          <Input
+            containerStyle={{ flex: 1, width: 100, alignSelf: 'center' }}
+            style={{ textAlign: 'center' }}
+            bold
+            placeholder='₹XX'
+            onClear={onClearInput}
+            onBlur={onBlurInput}
+            {...{ value, onChangeText, ...inputProps }}
+          />
+        </>
+      )}
       {isLoading ? (
         <ActivityIndicator
           style={{
@@ -155,18 +177,6 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
                       onPress: onSelect.bind(this, item),
                     }
                   : {})}
-              />
-            </>
-          )}
-          {input && (
-            <>
-              <Divider />
-              <Input
-                containerStyle={{ flex: 1, width: 100, alignSelf: 'center' }}
-                style={{ textAlign: 'center' }}
-                bold
-                placeholder='₹50'
-                {...{ onChangeText, ...inputProps }}
               />
             </>
           )}

@@ -16,11 +16,13 @@ import { Alert, View } from 'react-native';
 import { LoadingState } from '@zustand';
 import { commonStyles, hp, wp } from '@styles';
 import { UsersState } from '../../zustand';
+import { RequestState } from '../../zustand/RequestState';
 
 export const SettingsScreen = () => {
   const navigation = useNav();
   const { user, clearUser } = AuthState();
   const { clearState } = UsersState();
+  const { clearState: clearRequestState } = RequestState();
   const { setLoader } = LoadingState();
 
   const {
@@ -34,6 +36,7 @@ export const SettingsScreen = () => {
   const initLogout = useCallback(async () => {
     setLoader('Clearing creds');
     clearState();
+    clearRequestState();
     await logout();
     await GoogleSignin.signOut();
     clearUser();
@@ -56,6 +59,7 @@ export const SettingsScreen = () => {
       console.log('🚀 ~ deleteAccount ~ error:', error);
     } finally {
       clearState();
+      clearRequestState();
       clearUser();
       navigation.reset({
         index: 0,

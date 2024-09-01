@@ -1,30 +1,64 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, Image } from 'react-native';
-import { BaseIcon, BaseText, Card, TextButton, themedStyles } from '../common';
-import { commonStyles } from '@styles';
+import {
+  Avatar,
+  BaseIcon,
+  BaseText,
+  Card,
+  Chip,
+  TextButton,
+  themedStyles,
+} from '../common';
+import { commonStyles, hp, wp } from '@styles';
 import { Divider } from '../common/Divider';
 import { ViewStyles } from '@types';
-import { PayRequestItemType } from 'apps/pay-buddy/src/api/payRequests';
+import {
+  markAsPaid,
+  PayRequestItemAPIPaylod,
+  PayRequestItemType,
+  updateRequest,
+} from 'apps/pay-buddy/src/api/payRequests';
 import { showInProgress } from 'apps/pay-buddy/src/screens';
+import { useNav } from 'apps/pay-buddy/src/helper';
+import { LoadingState } from '@zustand';
+import { AuthState } from 'apps/pay-buddy/src/zustand';
 
 export type PayRequestCardProps = {
   containerStyle?: ViewStyles;
   data?: PayRequestItemType;
   isOwn: boolean;
   isPaid: boolean;
-  allPaid: boolean;
 };
 
 export const PayRequestCard = (props: PayRequestCardProps) => {
-  const {
-    containerStyle,
-    data,
-    isOwn = false,
-    isPaid = false,
-    allPaid = false,
-  } = props;
+  const { containerStyle, data, isOwn = false, isPaid = false } = props;
+
+  const { navigate } = useNav();
+  const { setLoader } = LoadingState();
 
   const styles = s();
+
+  const allPaid = useMemo(
+    () => data?.paidMembers?.length === data?.members?.length,
+    [data],
+  );
+
+  const paidMemberCount = useMemo(
+    () => (data?.paidMembers ? data?.paidMembers?.length : 0),
+    [data?.paidMembers],
+  );
+
+  const goToRequestInfo = useCallback(() => {
+    navigate('AddEditRequestScreen', { viewOnly: true, id: data?.id });
+  }, [data]);
+
+  const onPressMarkAsPaid = useCallback(async () => {
+    if (data?.id) {
+      setLoader('Updating request');
+      await markAsPaid(data);
+      setLoader('');
+    }
+  }, [data]);
 
   return (
     <Card
@@ -33,24 +67,13 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
         isPaid || allPaid ? styles.completedStyle : {},
         containerStyle,
       ]}
-      onPress={showInProgress}
+      onPress={goToRequestInfo}
     >
       <View style={[commonStyles.rowItemsCenter, styles.topContainer]}>
-        <Image
-          source={{
-            uri:
-              data?.user?.image ??
-              'https://imgs.search.brave.com/ugRIeNH7jBTHZaHmvGXVVJoLmLVRZbLW8sGbRd1y8L8/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvNTA3/NDgwODcyL3Bob3Rv/L3BvcnRyYWl0LW9m/LWEtbWF0dXJlLW1h/bi1zbWlsaW5nLWF0/LXRoZS1jYW1lcmEu/d2VicD9iPTEmcz0x/NzA2NjdhJnc9MCZr/PTIwJmM9YXY5OHJq/SU8yTXJ6TGFPSnN5/b2FBV3VwQ2tlcFpL/MVRKMGN1LURLQktB/dz0',
-          }}
-          style={{
-            height: 40,
-            width: 40,
-            borderRadius: 50,
-          }}
-        />
+        <Avatar size='tiny' uri={data?.created_by?.image} />
         <View style={[commonStyles.flex, { gap: 3 }]}>
           <BaseText bold>
-            {isOwn ? 'You' : data?.user?.name ?? `Vikram aditya chaudhry`}
+            {isOwn ? 'You' : data?.created_by?.name ?? `Vikram aditya chaudhry`}
           </BaseText>
           <BaseText medium sizeSmall>
             {data?.date
@@ -59,27 +82,39 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
           </BaseText>
         </View>
         <BaseText sizeLargeExtra bold style={styles.amount} numberOfLines={1}>
-          {`₹${data?.amount ?? 56}`}
+          {`₹${data?.requestAmount ?? '00'}`}
         </BaseText>
       </View>
       <Divider />
       <View style={styles.middleContainer}>
-        <BaseText sizeLargeExtra bold>
-          {data?.title ?? `Samosa, Pizza and Vadapav`}
-        </BaseText>
-        <BaseText sizeSmall semibold>
-          Requested to 3 members
-        </BaseText>
+        {!!data?.title && (
+          <BaseText sizeLargeExtra bold>
+            {data?.title}
+          </BaseText>
+        )}
+        <View style={[commonStyles.rowItemsCenter, { gap: wp(2) }]}>
+          <Chip
+            title={`${data?.members?.length} Members`}
+            icon='user-large'
+            iconProps={{
+              iFamily: 'FontAwesome6',
+            }}
+          />
+          {data?.groups && data?.groups?.length > 0 && (
+            <Chip
+              title={`${data?.groups?.length} Groups`}
+              icon='users'
+              iconProps={{
+                iFamily: 'FontAwesome6',
+              }}
+            />
+          )}
+        </View>
       </View>
       {
         <>
           <Divider />
-          <View
-            style={[
-              commonStyles.rowItemCenterJustifyEvenly,
-              styles.bottomContainer,
-            ]}
-          >
+          <View style={[commonStyles.row, styles.bottomContainer]}>
             {isPaid ? (
               <View style={[commonStyles.rowItemsCenter, styles.paidContainer]}>
                 <BaseIcon
@@ -87,8 +122,8 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
                   size={20}
                   iconStyle={styles.paidIcon}
                 />
-                <BaseText bold style={styles.paidIcon}>
-                  Paid on Sat 23 Aug 2024
+                <BaseText bold style={[styles.paidIcon]}>
+                  Paid
                 </BaseText>
               </View>
             ) : isOwn ? (
@@ -109,32 +144,38 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
                 <>
                   <TextButton
                     onPress={showInProgress}
-                    containerStyle={commonStyles.flex}
-                    title='2 Paid'
+                    containerStyle={styles.actionButtonStyle}
+                    title={`${paidMemberCount} Paid`}
                   />
                   <Divider vertical />
                   <TextButton
                     onPress={showInProgress}
-                    containerStyle={commonStyles.flex}
+                    containerStyle={styles.actionButtonStyle}
                     style={styles.remainingMemberButonColor}
-                    title='3 Remaining'
+                    title={`${
+                      data?.members
+                        ? data?.members?.length - paidMemberCount
+                        : 0
+                    } Remains`}
                   />
                 </>
               )
             ) : (
-              <>
-                <TextButton
-                  onPress={showInProgress}
-                  containerStyle={commonStyles.flex}
-                  title='Mark as Paid'
-                />
-                <Divider vertical />
-                <TextButton
-                  onPress={showInProgress}
-                  containerStyle={commonStyles.flex}
-                  title='Pay Now'
-                />
-              </>
+              data && (
+                <>
+                  <TextButton
+                    onPress={onPressMarkAsPaid}
+                    containerStyle={styles.actionButtonStyle}
+                    title='Mark as Paid'
+                  />
+                  <Divider vertical />
+                  <TextButton
+                    onPress={showInProgress}
+                    containerStyle={styles.actionButtonStyle}
+                    title='Pay Now'
+                  />
+                </>
+              )
             )}
           </View>
         </>
@@ -146,7 +187,8 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
 const s = () =>
   themedStyles(({ colors }) => ({
     container: {
-      gap: 5,
+      gap: hp(1),
+      minWidth: wp(70),
     },
     topContainer: {
       gap: 10,
@@ -163,12 +205,13 @@ const s = () =>
       gap: 10,
     },
     middleContainer: {
-      marginBottom: 5,
       marginHorizontal: 5,
-      gap: 3,
+      gap: hp(1),
     },
     bottomContainer: {
-      height: 35,
+      height: hp(3.5),
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     paidContainer: {
       gap: 5,
@@ -181,5 +224,9 @@ const s = () =>
     },
     remainingMemberButonColor: {
       color: colors.secondary,
+    },
+    actionButtonStyle: {
+      ...commonStyles.flex,
+      ...commonStyles.centerCenter,
     },
   }));

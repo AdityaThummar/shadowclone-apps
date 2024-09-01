@@ -10,7 +10,7 @@ export const SelectItemScreen = () => {
   return (
     <>
       {/* <Header title={params?.header ?? 'Select'} /> */}
-      {params?.type === 'group' ? (
+      {params?.type === 'select_groups' ? (
         <GroupScreen isSelect />
       ) : (
         <SearchScreen type={params?.type} />
