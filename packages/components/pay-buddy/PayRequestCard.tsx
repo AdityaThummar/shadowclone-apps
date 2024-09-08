@@ -75,7 +75,7 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
     const deleteReq = async () => {
       if (data?.id) {
         setLoader('Deleting request');
-        await deleteRequest(data);
+        await deleteRequest(data?.id);
         setLoader('');
       }
     };

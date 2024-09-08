@@ -10,6 +10,7 @@ import {
   PrimaryButton,
   ScreenWrapper,
   Scroll,
+  themedStyles,
   UserCardHalf,
 } from '@components';
 import { commonStyles, hp, wp } from '@styles';
@@ -19,7 +20,7 @@ import { GroupDetailsType, UserProfileType } from '../../api/types';
 import { AuthState, UsersState } from '../../zustand';
 import {
   createNewRequest,
-  markAsPaid,
+  deleteRequest,
   PayRequestDiffAmountType,
   PayRequestItemAPIPaylod,
   PayRequestItemType,
@@ -46,6 +47,8 @@ export const AddEditRequestScreen = () => {
   const { setLoader } = LoadingState();
   const { requests, selfRequests } = RequestState();
 
+  const styles = s();
+
   const [requestTitle, setRequestTitle] = useState<string>();
   const [requestAmount, setRequestAmount] = useState<string>('');
   const [diffAmounts, setDiffAmounts] = useState<PayRequestDiffAmountType>({});
@@ -56,6 +59,16 @@ export const AddEditRequestScreen = () => {
       viewOnly ? true : _.uid !== user?.userProfile?.uid,
     );
   }, [selectedMemebersForNew, user, viewOnly]);
+
+  const titleSort = useMemo(
+    () =>
+      requestTitle
+        ? requestTitle?.length > 50
+          ? requestTitle?.toString()?.slice(0, 47) + ' ...'
+          : requestTitle
+        : '',
+    [requestTitle],
+  );
 
   const goToAddItem = useCallback((type: 'group' | 'member' = 'member') => {
     navigate('SelectItemScreen', {
@@ -252,6 +265,33 @@ export const AddEditRequestScreen = () => {
     ],
   );
 
+  const onDeleteRequest = useCallback(() => {
+    const deleteReq = async () => {
+      if (params?.id) {
+        setLoader('Deleting request');
+        const deleteRespose = await deleteRequest(params?.id);
+        setLoader('');
+        if (deleteRespose?.success) {
+          goBack();
+        }
+      }
+    };
+
+    Alert.alert(
+      `Are you sure ?`,
+      `You want to delete this request${titleSort ? ':\n' + titleSort : ''}`,
+      [
+        {
+          text: 'Yes, Delete now',
+          onPress: deleteReq,
+        },
+        {
+          text: 'Cancel',
+        },
+      ],
+    );
+  }, [params?.id]);
+
   const canEdit = useMemo(
     () =>
       viewOnly
@@ -351,7 +391,7 @@ export const AddEditRequestScreen = () => {
           </View>
         )}
         {Spacer}
-        {viewOnly && (
+        {viewOnly && payRequestItem?.created_by && (
           <>
             <Header title={`Requested by`} sizeBig disableBack />
             <UserCardHalf item={payRequestItem?.created_by} />
@@ -401,25 +441,41 @@ export const AddEditRequestScreen = () => {
         )}
 
         {canEdit && (
-          <PrimaryButton
-            title={
-              viewOnly
-                ? 'Edit Request'
-                : edit
-                ? 'Update Request'
-                : 'Create Request'
-            }
-            style={{ marginTop: 15 }}
-            onPress={
-              viewOnly
-                ? goToEditRequest
-                : edit
-                ? onCreateRequest.bind(this, true)
-                : onCreateRequest.bind(this, false)
-            }
-          />
+          <>
+            <PrimaryButton
+              title={
+                viewOnly
+                  ? 'Edit Request'
+                  : edit
+                  ? 'Update Request'
+                  : 'Create Request'
+              }
+              style={{ marginTop: 15 }}
+              onPress={
+                viewOnly
+                  ? goToEditRequest
+                  : edit
+                  ? onCreateRequest.bind(this, true)
+                  : onCreateRequest.bind(this, false)
+              }
+            />
+            {viewOnly && (
+              <PrimaryButton
+                title={`Delete Request`}
+                onPress={onDeleteRequest}
+                style={styles.deleteContainer}
+              />
+            )}
+          </>
         )}
       </Scroll>
     </ScreenWrapper>
   );
 };
+
+const s = () =>
+  themedStyles(({ colors }) => ({
+    deleteContainer: {
+      backgroundColor: colors.error,
+    },
+  }));

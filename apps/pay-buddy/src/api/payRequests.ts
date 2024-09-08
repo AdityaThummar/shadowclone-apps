@@ -105,21 +105,14 @@ export const markAsPaid: (
   }
 };
 
-export const deleteRequest: (
-  data: PayRequestItemType,
-) => Promise<ResponseType> = async (data: PayRequestItemType) => {
+export const deleteRequest: (id: string) => Promise<ResponseType> = async (
+  id: string,
+) => {
   try {
-    if (!data?.id) {
+    if (!id) {
       return NoReasonErrorResponse;
     }
-
-    if (!data?.id) {
-      return NoReasonErrorResponse;
-    }
-    await firestore()
-      .collection(FIREBASE_PATHS.requests)
-      .doc(data?.id)
-      .delete();
+    await firestore().collection(FIREBASE_PATHS.requests).doc(id).delete();
 
     return {
       success: true,
