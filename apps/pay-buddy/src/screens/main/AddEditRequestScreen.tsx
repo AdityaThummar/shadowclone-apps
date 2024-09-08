@@ -148,6 +148,7 @@ export const AddEditRequestScreen = () => {
           enableRemove={!viewOnly}
           onPressRemove={onRemoveGroup}
           onPress={goToGroupInfo}
+          key={`group-${item?.id}`}
         />
       );
     },
@@ -211,6 +212,7 @@ export const AddEditRequestScreen = () => {
           onClearInput={onClearInput}
           onChangeText={onChangeText}
           onBlurInput={onBlurInput}
+          key={`member-${_member?.uid}`}
           {...extraProps}
         />
       );

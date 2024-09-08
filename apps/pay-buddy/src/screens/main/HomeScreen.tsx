@@ -102,7 +102,14 @@ export const HomeScreen = () => {
           (_pm) => _pm.uid === user?.userProfile?.uid,
         ) !== -1;
 
-      return <PayRequestCard data={_request} isOwn={isOwn} isPaid={isPaid} />;
+      return (
+        <PayRequestCard
+          key={_request?.id}
+          data={_request}
+          isOwn={isOwn}
+          isPaid={isPaid}
+        />
+      );
     },
     [user?.userProfile],
   );
@@ -150,23 +157,6 @@ export const HomeScreen = () => {
         />
       </View>
       <ScreenWrapper>
-        {/* <Card>
-          <BaseText semibold center>
-            {`All these are just a skeleton components that we will develop in upmost version, For now just know and enjoy this demo app we allow you to access.Thank you for using this App 🙂`}
-          </BaseText>
-        </Card> */}
-        {/* <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 5 }}
-          // stickyHeaderIndices={[0]}
-        >
-          <Header title='Home' disableBack />
-          <PayRequestCard />
-          <PayRequestCard />
-          <PayRequestCard />
-          <PayRequestCard />
-        </ScrollView> */}
-
         {allRequests && allRequests.length > 0 ? (
           <Scroll>{allRequests.map(renderRequests)}</Scroll>
         ) : (
@@ -174,35 +164,6 @@ export const HomeScreen = () => {
             <NoData />
           </View>
         )}
-
-        {/* <Input style={{ marginTop: 10 }} /> */}
-        {/* <SectionList
-          sections={[
-            {
-              title: 'Today',
-              data: ['1'],
-            },
-            {
-              title: 'Yesterday',
-              data: ['1'],
-            },
-            {
-              title: 'Thu 01 Aug 2024',
-              data: ['1', '2'],
-            },
-            {
-              title: 'Wed 31 Jul 2024',
-              data: ['1', '2', '3'],
-            },
-          ]}
-          renderItem={renderPayCard}
-          renderSectionHeader={renderSectionHeader}
-          showsVerticalScrollIndicator={false}
-          stickySectionHeadersEnabled
-          contentContainerStyle={{
-            paddingBottom: 15,
-          }}
-        /> */}
       </ScreenWrapper>
     </ScreenWrapper>
   );

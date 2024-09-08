@@ -17,6 +17,7 @@ import { hp, wp } from '@styles';
 import { UserProfileType } from '../../api/types';
 import { uploadUserProfile, uploadUserProfilePhoto } from '../../api';
 import { LoadingState } from '@zustand';
+import { useImagePicker } from '@hooks';
 
 export const EditProfileScreen = () => {
   const { params } = useRoute<RootRouteProps<'EditProfileScreen'>>();
@@ -27,6 +28,12 @@ export const EditProfileScreen = () => {
   const {
     themeValues: { colors },
   } = useThemed();
+
+  const onPickImage = (response: ImagePicker.ImagePickerResult) => {
+    setPickedImageResponse(response);
+  };
+
+  const { openCamera, openGallery } = useImagePicker(undefined, onPickImage);
 
   const [data, setData] = useState<UserProfileType>(
     params?.userData?.name
@@ -102,70 +109,6 @@ export const EditProfileScreen = () => {
       }
     }
   }, [data, pickedImageResponse]);
-
-  const openCamera = async () => {
-    try {
-      setLoader('Processing camera');
-      const permission = await ImagePicker.getCameraPermissionsAsync();
-      if (permission?.granted) {
-        const response = await ImagePicker.launchCameraAsync();
-        if (!response?.canceled) {
-          setPickedImageResponse(response);
-        }
-      } else {
-        Alert.alert(
-          'Oops',
-          'You need to give access of Camera to capture an image',
-          [
-            {
-              text: 'Cancel',
-            },
-            {
-              text: 'Open Settings',
-              onPress: Linking.openSettings,
-            },
-          ],
-        );
-      }
-      setLoader();
-    } catch (error) {
-      console.log('🚀 ~ openCamera ~ error:', error);
-      setLoader();
-    }
-  };
-
-  const openGallery = async () => {
-    try {
-      setLoader('Processing photos');
-      const permission = await ImagePicker.getMediaLibraryPermissionsAsync();
-      if (permission?.granted) {
-        const response = await ImagePicker.launchImageLibraryAsync({
-          selectionLimit: 1,
-        });
-        if (!response?.canceled) {
-          setPickedImageResponse(response);
-        }
-      } else {
-        Alert.alert(
-          'Oops',
-          'You need to give access of Photos to select an image',
-          [
-            {
-              text: 'Cancel',
-            },
-            {
-              text: 'Open Settings',
-              onPress: Linking.openSettings,
-            },
-          ],
-        );
-      }
-      setLoader();
-    } catch (error) {
-      console.log('🚀 ~ openGallery ~ error:', error);
-      setLoader();
-    }
-  };
 
   return (
     <ScreenWrapper>
