@@ -1,4 +1,4 @@
-import { Alert, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BaseText,
@@ -366,8 +366,8 @@ export const AddEditRequestScreen = () => {
 
   useEffect(() => {
     return () => {
-      setSelectedMemebersForNew([]);
-      setSelectedGroups([]);
+      // setSelectedMemebersForNew([]);
+      // setSelectedGroups([]);
     };
   }, [edit]);
 
@@ -384,141 +384,146 @@ export const AddEditRequestScreen = () => {
             : 'New Pay Request'
         }
       />
-      <Scroll>
-        {viewOnly ? (
-          <Card
-            style={[
-              {
-                padding: wp(5),
-                gap: hp(1),
-              },
-            ]}
-          >
-            <BaseText sizeLargeExtra bold center>
-              {requestTitle
-                ? requestTitle
-                : payRequestItem?.date
-                ? new Date(payRequestItem?.date).toDateString()
-                : ''}
-            </BaseText>
-            {requestTitle && (
-              <BaseText medium sizeSmall center>
-                {payRequestItem?.date
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'android' ? 'padding' : 'height'}
+        style={[commonStyles.flex]}
+      >
+        <Scroll>
+          {viewOnly ? (
+            <Card
+              style={[
+                {
+                  padding: wp(5),
+                  gap: hp(1),
+                },
+              ]}
+            >
+              <BaseText sizeLargeExtra bold center>
+                {requestTitle
+                  ? requestTitle
+                  : payRequestItem?.date
                   ? new Date(payRequestItem?.date).toDateString()
-                  : new Date().toDateString()}
+                  : ''}
               </BaseText>
-            )}
-          </Card>
-        ) : (
-          <View
-            style={[
-              commonStyles.rowItemsCenter,
-              {
-                marginVertical: 10,
-              },
-            ]}
-          >
-            <Input
-              label='Title'
-              placeholder='Ex. Pizza, Pasta etc'
-              containerStyle={[{ flex: 2.5 }]}
-              value={requestTitle}
-              onChangeText={setRequestTitle}
-              editable={!viewOnly}
-              allowClear={!viewOnly}
-            />
-            <Input
-              label='Amount'
-              placeholder='₹XX'
-              containerStyle={[commonStyles.flex]}
-              value={requestAmount}
-              onChangeText={setRequestAmount}
-              onClear={onClearRequest}
-              editable={!viewOnly}
-              allowClear={!viewOnly}
-              keyboardType='number-pad'
-            />
-          </View>
-        )}
-        {Spacer}
-        {viewOnly && payRequestItem?.created_by && (
-          <>
-            <Header title={`Requested by`} sizeBig disableBack />
-            <UserCardHalf item={payRequestItem?.created_by} />
-          </>
-        )}
-        {Spacer}
-        <Header
-          title={`Groups (${selectedGroups?.length})`}
-          sizeBig
-          disableBack
-          rightComponent={
-            !viewOnly && (
-              <PlusButton
-                name='circle-with-plus'
-                onPress={goToAddItem.bind(this, 'group')}
+              {requestTitle && (
+                <BaseText medium sizeSmall center>
+                  {payRequestItem?.date
+                    ? new Date(payRequestItem?.date).toDateString()
+                    : new Date().toDateString()}
+                </BaseText>
+              )}
+            </Card>
+          ) : (
+            <View
+              style={[
+                commonStyles.rowItemsCenter,
+                {
+                  marginVertical: 10,
+                },
+              ]}
+            >
+              <Input
+                label='Title'
+                placeholder='Ex. Pizza, Pasta etc'
+                containerStyle={[{ flex: 2.5 }]}
+                value={requestTitle}
+                onChangeText={setRequestTitle}
+                editable={!viewOnly}
+                allowClear={!viewOnly}
               />
-            )
-          }
-        />
-        {groups?.length > 0 ? (
-          groups.map(renderSelectedGroups)
-        ) : (
-          <BaseText regular sizeRegular style={{ marginHorizontal: wp(2.5) }}>
-            No group selected
-          </BaseText>
-        )}
-        {Spacer}
-        <Header
-          title={`Members (${selectedMemebersForNew?.length})`}
-          sizeBig
-          disableBack
-          rightComponent={
-            !viewOnly && (
-              <PlusButton
-                name='circle-with-plus'
-                onPress={goToAddItem.bind(this, 'member')}
+              <Input
+                label='Amount'
+                placeholder='₹XX'
+                containerStyle={[commonStyles.flex]}
+                value={requestAmount}
+                onChangeText={setRequestAmount}
+                onClear={onClearRequest}
+                editable={!viewOnly}
+                allowClear={!viewOnly}
+                keyboardType='number-pad'
               />
-            )
-          }
-        />
-        {selectedMembers?.length > 0 ? (
-          <Scroll horizontal>{selectedMembers.map(renderMembers)}</Scroll>
-        ) : (
-          <BaseText regular sizeRegular style={{ marginHorizontal: wp(2.5) }}>
-            No member selected
-          </BaseText>
-        )}
+            </View>
+          )}
+          {Spacer}
+          {viewOnly && payRequestItem?.created_by && (
+            <>
+              <Header title={`Requested by`} sizeBig disableBack />
+              <UserCardHalf item={payRequestItem?.created_by} />
+            </>
+          )}
+          {Spacer}
+          <Header
+            title={`Groups (${selectedGroups?.length})`}
+            sizeBig
+            disableBack
+            rightComponent={
+              !viewOnly && (
+                <PlusButton
+                  name='circle-with-plus'
+                  onPress={goToAddItem.bind(this, 'group')}
+                />
+              )
+            }
+          />
+          {groups?.length > 0 ? (
+            groups.map(renderSelectedGroups)
+          ) : (
+            <BaseText regular sizeRegular style={{ marginHorizontal: wp(2.5) }}>
+              No group selected
+            </BaseText>
+          )}
+          {Spacer}
+          <Header
+            title={`Members (${selectedMemebersForNew?.length})`}
+            sizeBig
+            disableBack
+            rightComponent={
+              !viewOnly && (
+                <PlusButton
+                  name='circle-with-plus'
+                  onPress={goToAddItem.bind(this, 'member')}
+                />
+              )
+            }
+          />
+          {selectedMembers?.length > 0 ? (
+            <Scroll horizontal>{selectedMembers.map(renderMembers)}</Scroll>
+          ) : (
+            <BaseText regular sizeRegular style={{ marginHorizontal: wp(2.5) }}>
+              No member selected
+            </BaseText>
+          )}
 
-        {canEdit && (
-          <>
-            <PrimaryButton
-              title={
-                viewOnly
-                  ? 'Edit Request'
-                  : edit
-                  ? 'Update Request'
-                  : 'Create Request'
-              }
-              style={{ marginTop: 15 }}
-              onPress={
-                viewOnly
-                  ? goToEditRequest
-                  : edit
-                  ? onCreateRequest.bind(this, true)
-                  : onCreateRequest.bind(this, false)
-              }
-            />
-            {viewOnly && (
+          {canEdit && (
+            <>
               <PrimaryButton
-                title={`Delete Request`}
-                onPress={onDeleteRequest}
-                style={styles.deleteContainer}
+                title={
+                  viewOnly
+                    ? 'Edit Request'
+                    : edit
+                    ? 'Update Request'
+                    : 'Create Request'
+                }
+                style={{ marginTop: 15 }}
+                onPress={
+                  viewOnly
+                    ? goToEditRequest
+                    : edit
+                    ? onCreateRequest.bind(this, true)
+                    : onCreateRequest.bind(this, false)
+                }
               />
-            )}
-          </>
-        )}
-      </Scroll>
+              {viewOnly && (
+                <PrimaryButton
+                  title={`Delete Request`}
+                  onPress={onDeleteRequest}
+                  style={styles.deleteContainer}
+                />
+              )}
+            </>
+          )}
+        </Scroll>
+      </KeyboardAvoidingView>
     </ScreenWrapper>
   );
 };

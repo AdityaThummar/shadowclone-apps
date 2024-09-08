@@ -24,6 +24,7 @@ export const Scroll = (props: ScrollProps) => {
       showsHorizontalScrollIndicator={false}
       bounces={false}
       ref={ref}
+      automaticallyAdjustKeyboardInsets
       {...props}
       style={[commonStyles.flex, props?.style]}
       contentContainerStyle={[

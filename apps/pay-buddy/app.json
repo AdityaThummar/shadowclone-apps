@@ -23,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.shadowclone.paybuddy",
-      "googleServicesFile": "./configs/pay-buddy-android-google-service.json"
+      "googleServicesFile": "./configs/pay-buddy-android-google-service.json",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/favicon.png"
