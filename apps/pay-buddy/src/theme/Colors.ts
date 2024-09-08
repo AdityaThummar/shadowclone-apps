@@ -3,6 +3,7 @@ import { ResourceType } from '@zustand';
 export const STATIC_COLORS = {
   error: '#ff3b30',
   googleBlue: '#007AFF',
+  success: '#4cd964',
 };
 
 export const ColorResource: ResourceType = {

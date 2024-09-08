@@ -1,5 +1,7 @@
 import {
   Avatar,
+  BaseText,
+  Chip,
   Header,
   IconButton,
   PayRequestCard,
@@ -11,15 +13,11 @@ import {
 import { useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RootRouteProps, useNav } from '../../helper';
-import { hp, wp } from '@styles';
+import { commonStyles, hp, wp } from '@styles';
 import { Alert, View } from 'react-native';
 import { AuthState, UsersState } from '../../zustand';
 import { RequestState } from '../../zustand/RequestState';
-import {
-  PayRequestItemAPIPaylod,
-  PayRequestItemType,
-  updateRequest,
-} from '../../api/payRequests';
+import { PayRequestItemType } from '../../api/payRequests';
 import { LoadingState } from '@zustand';
 import { SelectionState } from '../../zustand/SelectionState';
 import { getGroupDetails } from '../../api/groups';
@@ -82,6 +80,44 @@ export const ChatListScreen = () => {
     [groupDetails, requests, selfRequests],
   );
 
+  const remainingAmounts = useMemo(() => {
+    let totalIncome = 0;
+    let totalOut = 0;
+    if (user?.userProfile?.uid?.toString()) {
+      allRequests?.map((_req) => {
+        let totalRemainingForRequest = 0;
+        if (_req?.created_by?.uid === user?.userProfile?.uid) {
+          if (_req.members) {
+            _req.members?.map((_reqMem) => {
+              const isPaid =
+                _req?.paidMembers &&
+                _req?.paidMembers?.findIndex(
+                  (_pm) => _pm?.uid === _reqMem?.uid,
+                ) !== -1;
+
+              if (!isPaid) {
+                const difAmount = _req?.diffAmounts?.[_reqMem?.uid];
+                if (difAmount) {
+                  totalRemainingForRequest += Number(difAmount ?? 0);
+                } else {
+                  totalRemainingForRequest += Number(_req?.requestAmount ?? 0);
+                }
+              }
+            });
+          }
+          totalIncome += Number(totalRemainingForRequest ?? 0);
+        } else {
+          const needToPay = user?.userProfile?.uid
+            ? _req?.diffAmounts?.[user.userProfile.uid?.toString()] ??
+              _req?.requestAmount
+            : 0;
+          totalOut += Number(needToPay ?? 0);
+        }
+      });
+    }
+    return { totalIncome, totalOut };
+  }, [allRequests, user?.userProfile]);
+
   const renderChatImage = useCallback(
     () => <Avatar isGroup={group} uri={groupDetails?.image} size='tiny' />,
     [],
@@ -138,6 +174,18 @@ export const ChatListScreen = () => {
     navigate('AddEditRequestScreen');
   }, [group, groupDetails]);
 
+  const onPressSummary = useCallback(
+    (type: 'income' | 'expense' = 'income') => {
+      Alert.alert(
+        `Total pending ${type === 'income' ? 'Income' : 'Expense'}`,
+        type === 'income'
+          ? `Meaninig total ₹ ${remainingAmounts?.totalIncome} is pending from others in this group`
+          : `Meaninig total ₹ ${remainingAmounts?.totalIncome} is pending to pay to others in this group`,
+      );
+    },
+    [remainingAmounts],
+  );
+
   return (
     <ScreenWrapper>
       <Header
@@ -145,11 +193,57 @@ export const ChatListScreen = () => {
         title={groupDetails?.name}
         rightComponent={renderRightComponent()}
       />
-      <Scroll autoScrollBottom>{allRequests?.map(renderChatItem)}</Scroll>
+      <Scroll autoScrollBottom>
+        <>{allRequests?.map(renderChatItem)}</>
+      </Scroll>
+      <View
+        style={[
+          commonStyles.rowItemCenterJustifyCenter,
+          commonStyles.center,
+          {
+            marginTop: hp(1),
+            gap: wp(3),
+            maxWidth: wp(90),
+            flexWrap: 'wrap',
+          },
+        ]}
+      >
+        <BaseText sizeSmall semibold>
+          Pending amounts:
+        </BaseText>
+        <Chip
+          title={`₹ ${remainingAmounts?.totalIncome}`}
+          titleProps={{
+            sizeMedium: true,
+            sizeTiny: false,
+          }}
+          icon='arrow-down'
+          iconProps={{
+            iconStyle: {
+              color: colors.success,
+            },
+          }}
+          onPress={onPressSummary.bind(this, 'income')}
+        />
+        <Chip
+          title={`₹ ${remainingAmounts?.totalOut}`}
+          titleProps={{
+            sizeMedium: true,
+            sizeTiny: false,
+          }}
+          icon='arrow-up'
+          iconProps={{
+            iconStyle: {
+              color: colors.error,
+            },
+          }}
+          onPress={onPressSummary.bind(this, 'expense')}
+        />
+      </View>
       <PrimaryButton
         title='Create new request'
         style={{
-          marginTop: hp(2),
+          marginTop: hp(1.5),
         }}
         onPress={goToCreateNew}
       />

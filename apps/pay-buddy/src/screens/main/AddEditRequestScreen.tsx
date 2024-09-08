@@ -224,6 +224,7 @@ export const AddEditRequestScreen = () => {
               },
               bottomLabel: isPaid ? 'Paid' : '',
               bottomLabelIcon: 'checkmark-circle',
+              containerStyle: isPaid ? styles.paidContainer : {},
             }
           : {
               actions: [
@@ -526,5 +527,8 @@ const s = () =>
   themedStyles(({ colors }) => ({
     deleteContainer: {
       backgroundColor: colors.error,
+    },
+    paidContainer: {
+      backgroundColor: colors.completedCardBackground,
     },
   }));

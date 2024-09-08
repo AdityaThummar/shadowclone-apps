@@ -221,10 +221,15 @@ export const FirebaseListner = () => {
                   (_up) => _up.uid === __rm,
                 ) as UserProfileType,
             ) ?? [];
-          const groups = _rowreq?.groups?.map(
-            (__rm) =>
-              groupDetails?.find((_gd) => _gd.id === __rm) as GroupDetailsType,
-          );
+          const groups: GroupDetailsType[] = [];
+          [...(_rowreq?.groups ?? [])]?.map((__rm) => {
+            const groupFound = groupDetails?.find(
+              (_gd) => _gd.id === __rm,
+            ) as GroupDetailsType;
+            if (groupFound?.id) {
+              groups.push(groupFound);
+            }
+          });
           const created_by = userprofiles?.find(
             (_up) => _up.uid === _rowreq.created_by,
           ) as UserProfileType;

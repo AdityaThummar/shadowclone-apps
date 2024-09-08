@@ -9,6 +9,7 @@ export type ThemeColorsType = {
   tint?: string;
   text?: string;
   error?: string;
+  success?: string;
   inputBackground?: string;
   inputFocusTint?: string;
   inputPlaceHolder?: string;

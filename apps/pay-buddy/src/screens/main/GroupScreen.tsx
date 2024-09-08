@@ -9,7 +9,7 @@ import {
   Scroll,
   useThemed,
 } from '@components';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNav } from '../../helper';
 import { View } from 'react-native';
 import { commonStyles, hp, wp } from '@styles';
@@ -48,10 +48,10 @@ export const GroupScreen = (props: GroupScreenProps) => {
 
   const toggleSelection = useCallback(
     (_item: GroupDetailsType) => {
-      const isIn = selectedGroups?.findIndex((_) => _.id === _item.id) !== -1;
+      const isIn = selectedGroups?.findIndex((_) => _?.id === _item?.id) !== -1;
       let newArr = [...selectedGroups];
       if (isIn) {
-        newArr = newArr.filter((_) => _.id !== _item.id);
+        newArr = newArr.filter((_) => _?.id !== _item?.id);
       } else {
         newArr = [...newArr, _item];
       }
@@ -59,9 +59,9 @@ export const GroupScreen = (props: GroupScreenProps) => {
       newArr?.map((_gp) => {
         _gp.member?.map((_member) => {
           const isMemberIn =
-            newMembersArray?.findIndex((_) => _.uid === _member.uid) !== -1;
+            newMembersArray?.findIndex((_) => _?.uid === _member?.uid) !== -1;
           if (!isMemberIn) {
-            newMembersArray.push(_member);
+            newMembersArray?.push(_member);
           }
         });
       });
@@ -78,11 +78,13 @@ export const GroupScreen = (props: GroupScreenProps) => {
 
       return (
         <ListItemWithImage
-          key={_item.id}
+          key={_item?.id}
           item={_item}
           onPress={onPressHandler}
           isSelection={isSelect}
-          selected={selectedGroups?.findIndex((_) => _.id === _item.id) !== -1}
+          selected={
+            selectedGroups?.findIndex((_) => _?.id === _item?.id) !== -1
+          }
         />
       );
     },
