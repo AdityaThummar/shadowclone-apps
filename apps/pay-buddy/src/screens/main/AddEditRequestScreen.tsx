@@ -52,10 +52,10 @@ export const AddEditRequestScreen = () => {
   const [payRequestItem, setPayRequestItem] = useState<PayRequestItemType>();
 
   const selectedMembers: UserProfileType[] = useMemo(() => {
-    return selectedMemebersForNew?.filter(
-      (_) => _.uid !== user?.userProfile?.uid,
+    return selectedMemebersForNew?.filter((_) =>
+      viewOnly ? true : _.uid !== user?.userProfile?.uid,
     );
-  }, [selectedMemebersForNew]);
+  }, [selectedMemebersForNew, user, viewOnly]);
 
   const goToAddItem = useCallback((type: 'group' | 'member' = 'member') => {
     navigate('SelectItemScreen', {

@@ -357,7 +357,7 @@ export const SearchScreen = (props: SearchScreenProps) => {
               paddingBottom: 15,
             }}
           />
-          <PrimaryButton title='Done' onPress={goBack} />
+          {isSelect && <PrimaryButton title='Done' onPress={goBack} />}
         </View>
       )}
     </ScreenWrapper>
