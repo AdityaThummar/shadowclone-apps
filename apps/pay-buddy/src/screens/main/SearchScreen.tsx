@@ -26,6 +26,7 @@ import { commonStyles, hp, wp } from '@styles';
 import { useNav } from '../../helper';
 import { AuthState, UsersState } from '../../zustand';
 import { SelectionState } from '../../zustand/SelectionState';
+import { PayRequestItemType } from '../../api/payRequests';
 
 export type SearchScreenListTypes =
   | 'member'
@@ -38,11 +39,12 @@ export type SearchScreenListTypes =
 
 export type SearchScreenProps = {
   type?: SearchScreenListTypes;
+  payRequestItem?: PayRequestItemType;
 };
 
 export const SearchScreen = (props: SearchScreenProps) => {
   console.log('🚀 ~ SearchScreen ~ props:', props);
-  const { type = 'member' } = props;
+  const { type = 'member', payRequestItem } = props;
   const { navigate, goBack } = useNav();
   const { user } = AuthState();
   const { sentRequest, newUsers, blockedUsers, friends, userGroupsDetails } =
@@ -162,7 +164,7 @@ export const SearchScreen = (props: SearchScreenProps) => {
       return arr;
     }
 
-    const reqMembers: UserProfileType[] = [...friends];
+    const reqMembers: UserProfileType[] = [];
     const allGroupsMember: UserProfileType[] = [];
 
     userGroupsDetails
@@ -174,9 +176,14 @@ export const SearchScreen = (props: SearchScreenProps) => {
       })
       .flat(1);
 
-    allGroupsMember?.forEach((_member) => {
+    [...(friends ?? []), ...(allGroupsMember ?? [])]?.forEach((_member) => {
       const isIn = reqMembers?.findIndex((_i) => _i.uid === _member.uid) !== -1;
-      if (!isIn && _member.uid != user?.userProfile?.uid) {
+      const isPaid =
+        payRequestItem?.paidMembers &&
+        payRequestItem?.paidMembers.findIndex(
+          (_pm) => _pm?.uid === _member?.uid,
+        ) !== -1;
+      if (!isIn && _member.uid != user?.userProfile?.uid && !isPaid) {
         reqMembers.push(_member);
       }
     });
@@ -205,6 +212,7 @@ export const SearchScreen = (props: SearchScreenProps) => {
     blockedUsers,
     type,
     userGroupsDetails,
+    payRequestItem,
   ]);
 
   const dynamicTitle = useMemo(() => {

@@ -1,3 +1,4 @@
+import { PayRequestItemType } from '../api/payRequests';
 import { GroupDetailsType, UserProfileType } from '../api/types';
 import { SearchScreenListTypes } from '../screens';
 import { NavigatorScreenParams } from '@react-navigation/native';
@@ -15,6 +16,7 @@ export type StackScreenProps = {
     header?: string;
     onSelect?: (user?: UserProfileType) => void;
     selectedMemebers?: UserProfileType[];
+    payRequestItem?: PayRequestItemType;
   };
   AddEditGroupScreen?: {
     data: GroupDetailsType;

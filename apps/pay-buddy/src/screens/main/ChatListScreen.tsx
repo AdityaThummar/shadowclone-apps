@@ -106,6 +106,7 @@ export const ChatListScreen = () => {
           data={_item}
           isOwn={isOwn}
           isPaid={isPaid}
+          key={`request-chat-${_item?.id}`}
         />
       );
     },

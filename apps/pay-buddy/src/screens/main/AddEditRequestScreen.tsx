@@ -57,10 +57,14 @@ export const AddEditRequestScreen = () => {
   const [payRequestItem, setPayRequestItem] = useState<PayRequestItemType>();
 
   const selectedMembers: UserProfileType[] = useMemo(() => {
-    return selectedMemebersForNew?.filter((_) =>
-      viewOnly ? true : _.uid !== user?.userProfile?.uid,
-    );
-  }, [selectedMemebersForNew, user, viewOnly]);
+    if (viewOnly) {
+      return payRequestItem?.members ?? [];
+    } else {
+      return selectedMemebersForNew?.filter((_) =>
+        viewOnly ? true : _.uid !== user?.userProfile?.uid,
+      );
+    }
+  }, [selectedMemebersForNew, user, viewOnly, payRequestItem]);
 
   const titleSort = useMemo(
     () =>
@@ -72,12 +76,29 @@ export const AddEditRequestScreen = () => {
     [requestTitle],
   );
 
-  const goToAddItem = useCallback((type: 'group' | 'member' = 'member') => {
-    navigate('SelectItemScreen', {
-      type: type === 'group' ? 'select_groups' : 'select_req_members',
-      header: `Select ${type}`,
-    });
-  }, []);
+  const canEdit = useMemo(
+    () =>
+      viewOnly
+        ? payRequestItem?.created_by?.uid === user?.userProfile?.uid
+        : true,
+    [viewOnly, payRequestItem, user?.userProfile],
+  );
+
+  const groups = useMemo(
+    () => (viewOnly ? payRequestItem?.groups ?? [] : selectedGroups),
+    [viewOnly, payRequestItem, selectedGroups],
+  );
+
+  const goToAddItem = useCallback(
+    (type: 'group' | 'member' = 'member') => {
+      navigate('SelectItemScreen', {
+        type: type === 'group' ? 'select_groups' : 'select_req_members',
+        header: `Select ${type}`,
+        payRequestItem,
+      });
+    },
+    [payRequestItem],
+  );
 
   const goToEditRequest = useCallback(() => {
     if (payRequestItem?.id) {
@@ -189,16 +210,17 @@ export const AddEditRequestScreen = () => {
       };
 
       const isPaid =
+        payRequestItem?.paidMembers &&
         payRequestItem?.paidMembers?.findIndex(
           (_pm) => _pm.uid === _member?.uid,
         ) !== -1;
 
       const extraProps: Omit<UserCardhalfProps, 'item'> = {
-        ...(viewOnly
+        ...(viewOnly || isPaid
           ? {
               inputProps: {
-                editable: !viewOnly,
-                allowClear: !viewOnly,
+                editable: false,
+                allowClear: false,
               },
               bottomLabel: isPaid ? 'Paid' : '',
               bottomLabelIcon: 'checkmark-circle',
@@ -310,38 +332,43 @@ export const AddEditRequestScreen = () => {
     );
   }, [params?.id]);
 
-  const canEdit = useMemo(
-    () =>
-      viewOnly
-        ? payRequestItem?.created_by?.uid === user?.userProfile?.uid
-        : true,
-    [viewOnly, payRequestItem, user?.userProfile],
-  );
-
   useEffect(() => {
-    if (params?.id && isFocused) {
+    if (params?.id) {
       const data = [...requests, ...selfRequests]?.find(
         (_re) => _re.id === params.id,
       );
       setRequestTitle(data?.title ?? '');
       setRequestAmount(data?.requestAmount ?? '');
       setDiffAmounts(data?.diffAmounts ?? {});
+      setPayRequestItem(data);
       if (data?.members) {
         setSelectedMemebersForNew(data?.members);
       }
       if (data?.groups) {
         setSelectedGroups(data?.groups);
       }
-      setPayRequestItem(data);
     }
-  }, [params?.id, requests, selfRequests, isFocused]);
+  }, [params?.id, requests, selfRequests]);
+
+  useEffect(() => {
+    if (params?.id && isFocused) {
+      payRequestItem?.paidMembers?.map((_pm) => {
+        const isIncluded =
+          selectedMemebersForNew?.findIndex((_sm) => _sm?.uid === _pm?.uid) !==
+          -1;
+        if (!isIncluded) {
+          setSelectedMemebersForNew([...selectedMemebersForNew, _pm]);
+        }
+      });
+    }
+  }, [params?.id, payRequestItem, isFocused]);
 
   useEffect(() => {
     return () => {
       setSelectedMemebersForNew([]);
       setSelectedGroups([]);
     };
-  }, []);
+  }, [edit]);
 
   const Spacer = <View style={{ height: hp(1) }} />;
 
@@ -433,8 +460,8 @@ export const AddEditRequestScreen = () => {
             )
           }
         />
-        {selectedGroups?.length > 0 ? (
-          selectedGroups.map(renderSelectedGroups)
+        {groups?.length > 0 ? (
+          groups.map(renderSelectedGroups)
         ) : (
           <BaseText regular sizeRegular style={{ marginHorizontal: wp(2.5) }}>
             No group selected

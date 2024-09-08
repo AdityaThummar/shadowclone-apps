@@ -13,7 +13,10 @@ export const SelectItemScreen = () => {
       {params?.type === 'select_groups' ? (
         <GroupScreen isSelect />
       ) : (
-        <SearchScreen type={params?.type} />
+        <SearchScreen
+          type={params?.type}
+          payRequestItem={params?.payRequestItem}
+        />
       )}
     </>
   );

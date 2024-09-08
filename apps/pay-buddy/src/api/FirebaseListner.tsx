@@ -214,10 +214,13 @@ export const FirebaseListner = () => {
             (__rm) =>
               userprofiles?.find((_up) => _up.uid === __rm) as UserProfileType,
           );
-          const paidMembers = _rowreq?.paidMembers?.map(
-            (__rm) =>
-              userprofiles?.find((_up) => _up.uid === __rm) as UserProfileType,
-          );
+          const paidMembers =
+            _rowreq?.paidMembers?.map(
+              (__rm) =>
+                userprofiles?.find(
+                  (_up) => _up.uid === __rm,
+                ) as UserProfileType,
+            ) ?? [];
           const groups = _rowreq?.groups?.map(
             (__rm) =>
               groupDetails?.find((_gd) => _gd.id === __rm) as GroupDetailsType,
