@@ -8,7 +8,13 @@ export type CardProps = TouchableOpacityProps;
 export const Card = (props: CardProps) => {
   const styles = s();
 
-  return <Touchable {...props} style={[styles.container, props?.style]} />;
+  return (
+    <Touchable
+      disabled={!props?.onPress}
+      {...props}
+      style={[styles.container, props?.style]}
+    />
+  );
 };
 
 const s = () =>

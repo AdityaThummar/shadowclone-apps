@@ -9,7 +9,7 @@ import {
   UserCardHalf,
 } from '@components';
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RootRouteProps, useNav } from '../../helper';
 import { hp } from '@styles';
 import { AuthState, UsersState } from '../../zustand';
@@ -23,12 +23,13 @@ import {
   unBlockUser,
 } from '../../api/users';
 import {
+  GroupDetailsType,
   GroupMemberType,
   ResponseType,
   UserProfileType,
 } from '../../api/types';
-import { View } from 'react-native';
-import { leaveGroup } from '../../api/groups';
+import { Alert, View } from 'react-native';
+import { getGroupDetails, leaveGroup } from '../../api/groups';
 
 type ProfileActionTypes =
   | 'add-friend'
@@ -52,17 +53,51 @@ export const ViewProfileScreen = () => {
   } = UsersState();
   const { setLoader, isLoading } = LoadingState();
 
-  const { push, navigate } = useNav();
+  const { push, navigate, goBack } = useNav();
   const { params } = useRoute<RootRouteProps<'ViewProfileScreen'>>();
   const { group } = params;
 
-  const groupDetails = useMemo(() => {
-    if (userGroupsDetails?.length > 0) {
-      return userGroupsDetails?.find((_) => _.id === params?.groupDetails?.id);
-    } else {
-      return params?.groupDetails;
-    }
+  const [groupDetails, setGroupDetails] = useState<GroupDetailsType>();
+
+  useEffect(() => {
+    (async () => {
+      if (userGroupsDetails?.length > 0) {
+        const foundGroup = userGroupsDetails?.find(
+          (_) => _.id === params?.groupDetails?.id,
+        );
+        if (foundGroup && Object.keys(foundGroup).length > 0) {
+          setGroupDetails(foundGroup);
+        } else {
+          if (params?.groupDetails?.id) {
+            setLoader('Getting group');
+            const groupDetails = await getGroupDetails([
+              params?.groupDetails?.id,
+            ]);
+            setLoader('');
+            if (groupDetails?.error || !groupDetails?.data?.groups?.[0]?.id) {
+              Alert.alert(
+                'Oops',
+                'Either this group is deleted or something went wrong when try to get group details.',
+              );
+              goBack();
+            } else {
+              setGroupDetails(groupDetails?.data?.groups?.[0]);
+            }
+          }
+        }
+      } else if (params?.groupDetails) {
+        setGroupDetails(params?.groupDetails);
+      }
+    })();
   }, [params?.groupDetails, userGroupsDetails]);
+
+  const isGroupExistLocally = useMemo(() => {
+    return (
+      !!groupDetails?.id &&
+      userGroupsDetails?.findIndex((_ugp) => _ugp.id === groupDetails?.id) !==
+        -1
+    );
+  }, [userGroupsDetails, groupDetails]);
 
   const profileDetails = useMemo(() => {
     return (
@@ -238,19 +273,25 @@ export const ViewProfileScreen = () => {
     <ScreenWrapper>
       <Header title={`${group ? 'Group' : 'Profile'} details`} />
       <Scroll>
-        <Card
-          style={{ gap: hp(1.5), paddingVertical: hp(2), marginBottom: hp(2) }}
-        >
-          <Avatar uri={profileToDisplay?.image} size='big' />
-          <BaseText center sizeHugeHeading bold>
-            {profileToDisplay?.name}
-          </BaseText>
-          {profileToDisplay?.bio && (
-            <BaseText center sizeBig medium>
-              {profileToDisplay.bio}
+        {!isLoading && (
+          <Card
+            style={{
+              gap: hp(1.5),
+              paddingVertical: hp(2),
+              marginBottom: hp(2),
+            }}
+          >
+            <Avatar uri={profileToDisplay?.image} size='big' />
+            <BaseText center sizeHugeHeading bold>
+              {profileToDisplay?.name}
             </BaseText>
-          )}
-        </Card>
+            {profileToDisplay?.bio && (
+              <BaseText center sizeBig medium>
+                {profileToDisplay.bio}
+              </BaseText>
+            )}
+          </Card>
+        )}
         {profileDetails?.uid && !isLoading && (
           <>
             {isRequesting && !isBlocked && (
@@ -303,7 +344,7 @@ export const ViewProfileScreen = () => {
             )}
           </>
         )}
-        {group && (
+        {group && !!groupDetails?.id && !isLoading && (
           <>
             <View style={{ flex: 1, marginBottom: hp(1) }}>
               <Header
@@ -321,7 +362,9 @@ export const ViewProfileScreen = () => {
             {isAdmin && (
               <PrimaryButton title='Edit Group' onPress={goToEditGroup} />
             )}
-            <PrimaryButton title='Leave' onPress={leave} />
+            {isGroupExistLocally && (
+              <PrimaryButton title='Leave' onPress={leave} />
+            )}
           </>
         )}
       </Scroll>

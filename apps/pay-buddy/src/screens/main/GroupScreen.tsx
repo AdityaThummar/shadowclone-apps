@@ -9,10 +9,10 @@ import {
   Scroll,
   useThemed,
 } from '@components';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNav } from '../../helper';
 import { View } from 'react-native';
-import { commonStyles } from '@styles';
+import { commonStyles, hp, wp } from '@styles';
 import { GroupDetailsType, UserProfileType } from '../../api/types';
 import { UsersState } from '../../zustand';
 import { SelectionState } from '../../zustand/SelectionState';
@@ -32,6 +32,8 @@ export const GroupScreen = (props: GroupScreenProps) => {
   const {
     themeValues: { colors },
   } = useThemed();
+
+  const [searchText, setSearchText] = useState<string>('');
 
   const goToAddNew = useCallback(() => {
     navigate('AddEditGroupScreen');
@@ -87,6 +89,20 @@ export const GroupScreen = (props: GroupScreenProps) => {
     [isSelect, selectedGroups],
   );
 
+  const searchedArray: GroupDetailsType[] = useMemo(() => {
+    const stext = searchText?.toLowerCase();
+
+    const arr = userGroupsDetails?.filter((_item) =>
+      _item?.name?.toLowerCase()?.includes(stext),
+    );
+
+    if (searchText) {
+      return arr;
+    } else {
+      return userGroupsDetails;
+    }
+  }, [searchText, userGroupsDetails]);
+
   return (
     <ScreenWrapper>
       <Header
@@ -101,9 +117,23 @@ export const GroupScreen = (props: GroupScreenProps) => {
           />
         }
       />
-      <Input style={{ marginBottom: 10 }} placeholder='Search here ..' />
-      {userGroupsDetails?.length > 0 ? (
-        <Scroll>{userGroupsDetails?.map(renderGroup)}</Scroll>
+      <Input
+        containerStyle={{ marginBottom: 10 }}
+        placeholder='Search here ..'
+        value={searchText}
+        onChangeText={setSearchText}
+      />
+      {searchText && (
+        <BaseText
+          semibold
+          style={{
+            marginBottom: hp(1),
+            marginHorizontal: wp(4),
+          }}
+        >{`${searchedArray?.length} search found for "${searchText}"`}</BaseText>
+      )}
+      {searchedArray?.length > 0 ? (
+        <Scroll>{searchedArray?.map(renderGroup)}</Scroll>
       ) : (
         <View style={[commonStyles.centerCenter, commonStyles.flex]}>
           <BaseText regular sizeRegular center>

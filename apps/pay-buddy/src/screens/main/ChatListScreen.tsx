@@ -9,11 +9,11 @@ import {
   useThemed,
 } from '@components';
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RootRouteProps, useNav } from '../../helper';
 import { hp, wp } from '@styles';
-import { View } from 'react-native';
-import { AuthState } from '../../zustand';
+import { Alert, View } from 'react-native';
+import { AuthState, UsersState } from '../../zustand';
 import { RequestState } from '../../zustand/RequestState';
 import {
   PayRequestItemAPIPaylod,
@@ -21,6 +21,9 @@ import {
   updateRequest,
 } from '../../api/payRequests';
 import { LoadingState } from '@zustand';
+import { SelectionState } from '../../zustand/SelectionState';
+import { getGroupDetails } from '../../api/groups';
+import { GroupDetailsType } from '../../api/types';
 
 export const ChatListScreen = () => {
   const { params } = useRoute<RootRouteProps<'ChatListScreen'>>();
@@ -28,16 +31,59 @@ export const ChatListScreen = () => {
   const data = params?.data;
 
   const { user } = AuthState();
+  const { userGroupsDetails } = UsersState();
   const { requests, selfRequests } = RequestState();
   const { setLoader } = LoadingState();
+  const { setSelectedGroups } = SelectionState();
 
-  const { navigate } = useNav();
+  const { navigate, goBack } = useNav();
   const {
     themeValues: { colors },
   } = useThemed();
 
+  const [groupDetails, setGroupDetails] = useState<GroupDetailsType>();
+
+  useEffect(() => {
+    (async () => {
+      if (userGroupsDetails?.length > 0) {
+        const foundGroup = userGroupsDetails?.find((_) => _.id === data?.id);
+        if (foundGroup && Object.keys(foundGroup).length > 0) {
+          setGroupDetails(foundGroup);
+        } else {
+          if (data?.id) {
+            setLoader('Getting group');
+            const groupDetails = await getGroupDetails([data?.id]);
+            setLoader('');
+            if (groupDetails?.error || !groupDetails?.data?.groups?.[0]?.id) {
+              Alert.alert(
+                'Oops',
+                'Either this group is deleted or something went wrong when try to get group details.',
+              );
+              goBack();
+            } else {
+              setGroupDetails(groupDetails?.data?.groups?.[0]);
+            }
+          }
+        }
+      } else if (data) {
+        setGroupDetails(data);
+      }
+    })();
+  }, [data, userGroupsDetails]);
+
+  const allRequests = useMemo(
+    () =>
+      [...requests, ...selfRequests]?.filter(
+        (_item) =>
+          _item.groups &&
+          _item?.groups?.findIndex((_gp) => _gp?.id === groupDetails?.id) !==
+            -1,
+      ),
+    [groupDetails, requests, selfRequests],
+  );
+
   const renderChatImage = useCallback(
-    () => <Avatar isGroup={group} uri={data?.image} size='tiny' />,
+    () => <Avatar isGroup={group} uri={groupDetails?.image} size='tiny' />,
     [],
   );
 
@@ -67,8 +113,8 @@ export const ChatListScreen = () => {
   );
 
   const goToInfo = useCallback(() => {
-    navigate('ViewProfileScreen', { group: true, groupDetails: data });
-  }, [data]);
+    navigate('ViewProfileScreen', { group: true, groupDetails: groupDetails });
+  }, [groupDetails]);
 
   const renderRightComponent = useCallback(
     () => (
@@ -81,28 +127,21 @@ export const ChatListScreen = () => {
         />
       </View>
     ),
-    [],
+    [groupDetails],
   );
 
   const goToCreateNew = useCallback(() => {
+    if (group && groupDetails?.id) {
+      setSelectedGroups([groupDetails]);
+    }
     navigate('AddEditRequestScreen');
-  }, []);
-
-  const allRequests = useMemo(
-    () =>
-      [...requests, ...selfRequests]?.filter(
-        (_item) =>
-          _item.groups &&
-          _item?.groups?.findIndex((_gp) => _gp.id === data?.id) !== -1,
-      ),
-    [data, requests, selfRequests],
-  );
+  }, [group, groupDetails]);
 
   return (
     <ScreenWrapper>
       <Header
         leftComponent={renderChatImage()}
-        title={data?.name}
+        title={groupDetails?.name}
         rightComponent={renderRightComponent()}
       />
       <Scroll autoScrollBottom>{allRequests?.map(renderChatItem)}</Scroll>
