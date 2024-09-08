@@ -40,7 +40,8 @@ export type UserCardhalfProps = {
   isLoading?: boolean;
   containerStyle?: ViewStyles;
   onSelect?: (user: UserProfileType) => void;
-  isAdmin?: boolean;
+  bottomLabel?: string;
+  bottomLabelIcon?: string;
 };
 
 export const UserCardHalf = (props: UserCardhalfProps) => {
@@ -59,7 +60,8 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
     isLoading = false,
     containerStyle = {},
     onSelect,
-    isAdmin = false,
+    bottomLabel = '',
+    bottomLabelIcon = '',
   } = props;
 
   const { push } = useNav();
@@ -106,7 +108,7 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
       style={[
         commonStyles.flex,
         styles.container,
-        isAdmin && {
+        !!bottomLabel && {
           paddingBottom: hp(4),
           marginBottom: hp(2),
         },
@@ -182,7 +184,7 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
           )}
         </>
       )}
-      {isAdmin && (
+      {!!bottomLabel && (
         <Card
           style={[
             commonStyles.rowItemCenterJustifyCenter,
@@ -196,9 +198,9 @@ export const UserCardHalf = (props: UserCardhalfProps) => {
             },
           ]}
         >
-          <BaseIcon name='ribbon' color={colors.tint} size={20} />
+          <BaseIcon name={bottomLabelIcon} color={colors.tint} size={20} />
           <BaseText sizeTinyExtra semibold style={{ color: colors.tint }}>
-            Admin
+            {bottomLabel}
           </BaseText>
         </Card>
       )}

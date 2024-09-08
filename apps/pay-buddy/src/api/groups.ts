@@ -21,10 +21,10 @@ export const getGroupDetails: (
     const userGroups = groups;
     if (groups?.length === 0 || !groups) {
       const response = await firestore()
-      .collection(FIREBASE_PATHS.aditionalInfo)
-      .doc(currentUserId)
-      .collection(FIREBASE_PATHS.groups)
-      .get();
+        .collection(FIREBASE_PATHS.aditionalInfo)
+        .doc(currentUserId)
+        .collection(FIREBASE_PATHS.groups)
+        .get();
       response.docs.forEach((_group) => {
         const _groupData = _group.data();
         if (_groupData?.id) {
@@ -242,6 +242,44 @@ export const leaveGroup: (id?: string) => Promise<ResponseType> = async (
       image: GroupDetails?.image ?? '',
     };
     await groupRef.update(newGroupDetails);
+
+    return {
+      success: true,
+      data: {},
+    };
+  } catch (error) {
+    console.log('🚀 ~ error:', error);
+    return NoReasonErrorResponse;
+  }
+};
+
+export const deleteGroup: (
+  data: GroupDetailsType,
+) => Promise<ResponseType> = async (data: GroupDetailsType) => {
+  try {
+    const groupId = data?.id;
+
+    if (!groupId) {
+      return NoReasonErrorResponse;
+    }
+
+    const groupRef = firestore().collection(FIREBASE_PATHS.groups).doc(groupId);
+
+    if (data?.image) {
+      await storage().ref(`${FIREBASE_PATHS.groups}/${groupId}`).delete();
+    }
+    await groupRef.delete();
+    data.member?.forEach(async (m) => {
+      if (!m.uid) {
+        return;
+      }
+      await firestore()
+        .collection(FIREBASE_PATHS.aditionalInfo)
+        .doc(m?.uid)
+        .collection(FIREBASE_PATHS.groups)
+        .doc(groupId)
+        .delete();
+    });
 
     return {
       success: true,

@@ -12,6 +12,7 @@ import {
   Scroll,
   themedStyles,
   UserCardHalf,
+  UserCardhalfProps,
 } from '@components';
 import { commonStyles, hp, wp } from '@styles';
 import { RootRouteProps, useNav } from '../../helper';
@@ -187,13 +188,20 @@ export const AddEditRequestScreen = () => {
         }
       };
 
-      const extraProps = {
+      const isPaid =
+        payRequestItem?.paidMembers?.findIndex(
+          (_pm) => _pm.uid === _member?.uid,
+        ) !== -1;
+
+      const extraProps: Omit<UserCardhalfProps, 'item'> = {
         ...(viewOnly
           ? {
               inputProps: {
                 editable: !viewOnly,
                 allowClear: !viewOnly,
               },
+              bottomLabel: isPaid ? 'Paid' : '',
+              bottomLabelIcon: 'checkmark-circle',
             }
           : {
               actions: [
@@ -202,6 +210,7 @@ export const AddEditRequestScreen = () => {
                   onPress: onRemoveMembers,
                 },
               ],
+              inputProps: { keyboardType: 'number-pad' },
             }),
       };
 
@@ -218,7 +227,13 @@ export const AddEditRequestScreen = () => {
         />
       );
     },
-    [selectedMemebersForNew, selectedMembers, requestAmount, diffAmounts],
+    [
+      selectedMemebersForNew,
+      selectedMembers,
+      requestAmount,
+      diffAmounts,
+      payRequestItem,
+    ],
   );
 
   const onClearRequest = useCallback(() => {
@@ -393,6 +408,7 @@ export const AddEditRequestScreen = () => {
               onClear={onClearRequest}
               editable={!viewOnly}
               allowClear={!viewOnly}
+              keyboardType='number-pad'
             />
           </View>
         )}

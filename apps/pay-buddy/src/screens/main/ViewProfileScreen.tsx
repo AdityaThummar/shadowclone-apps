@@ -6,6 +6,7 @@ import {
   PrimaryButton,
   ScreenWrapper,
   Scroll,
+  themedStyles,
   UserCardHalf,
 } from '@components';
 import { useRoute } from '@react-navigation/native';
@@ -29,7 +30,7 @@ import {
   UserProfileType,
 } from '../../api/types';
 import { Alert, View } from 'react-native';
-import { getGroupDetails, leaveGroup } from '../../api/groups';
+import { deleteGroup, getGroupDetails, leaveGroup } from '../../api/groups';
 
 type ProfileActionTypes =
   | 'add-friend'
@@ -59,9 +60,11 @@ export const ViewProfileScreen = () => {
 
   const [groupDetails, setGroupDetails] = useState<GroupDetailsType>();
 
+  const styles = s();
+
   useEffect(() => {
     (async () => {
-      if (userGroupsDetails?.length > 0) {
+      if (userGroupsDetails?.length > 0 && !isLoading) {
         const foundGroup = userGroupsDetails?.find(
           (_) => _.id === params?.groupDetails?.id,
         );
@@ -89,7 +92,7 @@ export const ViewProfileScreen = () => {
         setGroupDetails(params?.groupDetails);
       }
     })();
-  }, [params?.groupDetails, userGroupsDetails]);
+  }, [params?.groupDetails, userGroupsDetails, isLoading]);
 
   const isGroupExistLocally = useMemo(() => {
     return (
@@ -237,6 +240,35 @@ export const ViewProfileScreen = () => {
     }
   }, [groupDetails]);
 
+  const onPressDeleteGroup = useCallback(() => {
+    const delGroup = async () => {
+      if (groupDetails?.id) {
+        setLoader('Deleting group');
+        await deleteGroup(groupDetails);
+        setLoader('');
+        navigate('BottomTab', {
+          screen: 'Groups',
+        });
+      }
+    };
+
+    Alert.alert(
+      `Are you sure ?`,
+      `You want to delete this group${
+        groupDetails?.name ? ':\n' + groupDetails?.name : ''
+      }`,
+      [
+        {
+          text: 'Yes, Delete now',
+          onPress: delGroup,
+        },
+        {
+          text: 'Cancel',
+        },
+      ],
+    );
+  }, [groupDetails]);
+
   const groupMembers = useMemo(() => {
     const members: GroupMemberType[] = [];
     const admins: GroupMemberType[] = [];
@@ -261,7 +293,14 @@ export const ViewProfileScreen = () => {
   }, [groupDetails, user?.userProfile]);
 
   const renderGroupMemebers = useCallback((_item: GroupMemberType) => {
-    return <UserCardHalf item={_item} isAdmin={_item?.admin} key={_item.uid} />;
+    return (
+      <UserCardHalf
+        item={_item}
+        bottomLabel={_item?.admin ? 'Admin' : ''}
+        bottomLabelIcon='ribbon'
+        key={_item.uid}
+      />
+    );
   }, []);
 
   const profileToDisplay = useMemo(
@@ -359,11 +398,18 @@ export const ViewProfileScreen = () => {
                 {groupMembers?.map(renderGroupMemebers)}
               </Scroll>
             </View>
-            {isAdmin && (
-              <PrimaryButton title='Edit Group' onPress={goToEditGroup} />
-            )}
             {isGroupExistLocally && (
               <PrimaryButton title='Leave' onPress={leave} />
+            )}
+            {isAdmin && (
+              <>
+                <PrimaryButton title='Edit Group' onPress={goToEditGroup} />
+                <PrimaryButton
+                  title='Delete Group'
+                  style={styles.deleteContainer}
+                  onPress={onPressDeleteGroup}
+                />
+              </>
             )}
           </>
         )}
@@ -371,3 +417,10 @@ export const ViewProfileScreen = () => {
     </ScreenWrapper>
   );
 };
+
+const s = () =>
+  themedStyles(({ colors }) => ({
+    deleteContainer: {
+      backgroundColor: colors.error,
+    },
+  }));
