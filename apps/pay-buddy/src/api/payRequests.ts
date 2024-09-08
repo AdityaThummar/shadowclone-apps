@@ -76,7 +76,9 @@ export const updateRequest: (
   }
 };
 
-export const markAsPaid = async (data: PayRequestItemType) => {
+export const markAsPaid: (
+  data: PayRequestItemType,
+) => Promise<ResponseType> = async (data: PayRequestItemType) => {
   try {
     const userId = auth().currentUser?.uid;
     if (!data?.id || !userId) {
@@ -97,6 +99,32 @@ export const markAsPaid = async (data: PayRequestItemType) => {
     };
 
     return await updateRequest(payRequstPayload);
+  } catch (error) {
+    console.log('🚀 ~ markAsPaid ~ error:', error);
+    return NoReasonErrorResponse;
+  }
+};
+
+export const deleteRequest: (
+  data: PayRequestItemType,
+) => Promise<ResponseType> = async (data: PayRequestItemType) => {
+  try {
+    if (!data?.id) {
+      return NoReasonErrorResponse;
+    }
+
+    if (!data?.id) {
+      return NoReasonErrorResponse;
+    }
+    await firestore()
+      .collection(FIREBASE_PATHS.requests)
+      .doc(data?.id)
+      .delete();
+
+    return {
+      success: true,
+      data: {},
+    };
   } catch (error) {
     console.log('🚀 ~ markAsPaid ~ error:', error);
     return NoReasonErrorResponse;

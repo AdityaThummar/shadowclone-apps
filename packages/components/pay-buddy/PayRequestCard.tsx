@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { View, Image } from 'react-native';
+import { View, Alert } from 'react-native';
 import {
   Avatar,
   BaseIcon,
@@ -13,6 +13,7 @@ import { commonStyles, hp, wp } from '@styles';
 import { Divider } from '../common/Divider';
 import { ViewStyles } from '@types';
 import {
+  deleteRequest,
   markAsPaid,
   PayRequestItemAPIPaylod,
   PayRequestItemType,
@@ -38,6 +39,16 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
 
   const styles = s();
 
+  const titleSort = useMemo(
+    () =>
+      data?.title
+        ? data?.title?.length > 50
+          ? data?.title?.toString()?.slice(0, 47) + ' ...'
+          : data?.title
+        : '',
+    [data?.title],
+  );
+
   const allPaid = useMemo(
     () => data?.paidMembers?.length === data?.members?.length,
     [data],
@@ -58,6 +69,30 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
       await markAsPaid(data);
       setLoader('');
     }
+  }, [data]);
+
+  const onPressDeleteRequest = useCallback(() => {
+    const deleteReq = async () => {
+      if (data?.id) {
+        setLoader('Deleting request');
+        await deleteRequest(data);
+        setLoader('');
+      }
+    };
+
+    Alert.alert(
+      `Are you sure ?`,
+      `You want to delete this request${data?.title ? ':\n' + titleSort : ''}`,
+      [
+        {
+          text: 'Yes, Delete now',
+          onPress: deleteReq,
+        },
+        {
+          text: 'Cancel',
+        },
+      ],
+    );
   }, [data]);
 
   return (
@@ -88,7 +123,7 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
       <Divider />
       <View style={styles.middleContainer}>
         {!!data?.title && (
-          <BaseText sizeLargeExtra bold>
+          <BaseText sizeLargeExtra bold numberOfLines={2}>
             {data?.title}
           </BaseText>
         )}
@@ -111,23 +146,23 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
           )}
         </View>
       </View>
-      {
-        <>
-          <Divider />
-          <View style={[commonStyles.row, styles.bottomContainer]}>
-            {isPaid ? (
-              <View style={[commonStyles.rowItemsCenter, styles.paidContainer]}>
-                <BaseIcon
-                  name='checkmark-circle'
-                  size={20}
-                  iconStyle={styles.paidIcon}
-                />
-                <BaseText bold style={[styles.paidIcon]}>
-                  Paid
-                </BaseText>
-              </View>
-            ) : isOwn ? (
-              allPaid ? (
+      <>
+        <Divider />
+        <View style={[commonStyles.row, styles.bottomContainer]}>
+          {isPaid ? (
+            <View style={[commonStyles.rowItemsCenter, styles.paidContainer]}>
+              <BaseIcon
+                name='checkmark-circle'
+                size={20}
+                iconStyle={styles.paidIcon}
+              />
+              <BaseText bold style={[styles.paidIcon]}>
+                Paid
+              </BaseText>
+            </View>
+          ) : isOwn ? (
+            <>
+              {allPaid ? (
                 <View
                   style={[commonStyles.rowItemsCenter, styles.paidContainer]}
                 >
@@ -159,27 +194,38 @@ export const PayRequestCard = (props: PayRequestCardProps) => {
                     } Remains`}
                   />
                 </>
-              )
-            ) : (
-              data && (
-                <>
-                  <TextButton
-                    onPress={onPressMarkAsPaid}
-                    containerStyle={styles.actionButtonStyle}
-                    title='Mark as Paid'
-                  />
-                  <Divider vertical />
-                  <TextButton
-                    onPress={showInProgress}
-                    containerStyle={styles.actionButtonStyle}
-                    title='Pay Now'
-                  />
-                </>
-              )
-            )}
-          </View>
+              )}
+            </>
+          ) : (
+            data && (
+              <>
+                <TextButton
+                  onPress={onPressMarkAsPaid}
+                  containerStyle={styles.actionButtonStyle}
+                  title='Mark as Paid'
+                />
+                <Divider vertical />
+                <TextButton
+                  onPress={showInProgress}
+                  containerStyle={styles.actionButtonStyle}
+                  title='Pay Now'
+                />
+              </>
+            )
+          )}
+        </View>
+      </>
+      {isOwn && (
+        <>
+          <Divider />
+          <TextButton
+            onPress={onPressDeleteRequest}
+            containerStyle={[styles.actionButtonStyle, styles.deleteContainer]}
+            title={`Delete Request`}
+            style={styles.deleteButton}
+          />
         </>
-      }
+      )}
     </Card>
   );
 };
@@ -228,5 +274,11 @@ const s = () =>
     actionButtonStyle: {
       ...commonStyles.flex,
       ...commonStyles.centerCenter,
+    },
+    deleteButton: {
+      color: colors.error,
+    },
+    deleteContainer: {
+      height: hp(3.5),
     },
   }));
