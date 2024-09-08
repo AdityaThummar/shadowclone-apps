@@ -21,10 +21,10 @@ export const getGroupDetails: (
     const userGroups = groups;
     if (groups?.length === 0 || !groups) {
       const response = await firestore()
-        .collection(FIREBASE_PATHS.aditionalInfo)
-        .doc(currentUserId)
-        .collection(FIREBASE_PATHS.groups)
-        .get();
+      .collection(FIREBASE_PATHS.aditionalInfo)
+      .doc(currentUserId)
+      .collection(FIREBASE_PATHS.groups)
+      .get();
       response.docs.forEach((_group) => {
         const _groupData = _group.data();
         if (_groupData?.id) {
@@ -192,10 +192,10 @@ export const updateGroup: (
       const memberRef = getMemberGroupPathRef(m?.uid);
       const memberGroupDoc = await memberRef.get();
       const isExists = memberGroupDoc.data()?.id;
-      if (!m.uid || !!isExists) {
+      if (!m.uid || !isExists) {
         return;
       }
-      await memberRef.set({
+      await memberRef.update({
         id: data?.id,
         date: new Date(),
       });

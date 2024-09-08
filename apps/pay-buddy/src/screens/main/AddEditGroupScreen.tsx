@@ -112,7 +112,7 @@ export const AddEditGroupScreen = () => {
       const removeMemberIds = oldData?.member
         ?.filter(
           (_) =>
-            selectedMemebersForNew?.findIndex((__) => __.uid !== _.uid) !== -1,
+            selectedMemebersForNew?.findIndex((__) => __.uid === _.uid) === -1,
         )
         ?.map((_) => _.uid);
       await updateGroup(
@@ -125,7 +125,15 @@ export const AddEditGroupScreen = () => {
     }
     setLoader('');
     goBack();
-  }, [data, selectedMembers, user, oldData, isEdit, pickedImageResponse]);
+  }, [
+    data,
+    selectedMembers,
+    user,
+    oldData,
+    isEdit,
+    pickedImageResponse,
+    selectedMemebersForNew,
+  ]);
 
   useEffect(() => {
     let userToSet: UserProfileType[] = [];

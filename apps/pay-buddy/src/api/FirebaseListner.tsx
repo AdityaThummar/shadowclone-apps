@@ -78,20 +78,41 @@ export const FirebaseListner = () => {
     if (response?.success && response?.data?.groups) {
       setUserGroupsDetails(response?.data?.groups);
     }
-  }, [userGroups]);
+  }, [userGroups, user]);
 
   const setNewGroups = useCallback(
     (
       snap: FirebaseFirestoreTypes.QuerySnapshot<FirebaseFirestoreTypes.DocumentData>,
     ) => {
-      const formatedArray: UserGroups[] = snap.docs.map((_gp) => {
+      const totalGroups: UserGroups[] = [];
+
+      snap?.docChanges()?.map((_scgp) => {
+        const _data = _scgp?.doc?.data();
+        totalGroups?.push({
+          id: _data?.id,
+          date: _data?.date,
+        });
+      });
+
+      snap.docs.map((_gp) => {
         const _gpData = _gp?.data();
         return {
           id: _gpData?.id,
           date: _gpData?.date,
         };
       });
-      setUserGroups(formatedArray);
+
+      const uniqueGroups: UserGroups[] = [];
+
+      totalGroups?.map((_gp) => {
+        const isIn =
+          uniqueGroups?.findIndex((_tgp) => _tgp?.id === _gp?.id) !== -1;
+        if (!!_gp?.id && !isIn) {
+          uniqueGroups.push(_gp);
+        }
+      });
+
+      setUserGroups(uniqueGroups);
     },
     [],
   );
@@ -232,7 +253,7 @@ export const FirebaseListner = () => {
     getAndSetBlockUsers(true);
     getAndSetFriends(true);
     getNewUsers();
-    // getNewGroups();
+    getNewGroups();
   };
 
   useEffect(() => {
@@ -243,6 +264,9 @@ export const FirebaseListner = () => {
     let blockByUsersListner: () => void;
     let newUsersListner: () => void;
     let groupListner: () => void;
+
+    let userRequests: () => void;
+    let userSelfRequests: () => void;
 
     if (userId) {
       console.log('calling newone');
@@ -272,6 +296,14 @@ export const FirebaseListner = () => {
         blocked_by: listnerPath('blocked_by'),
         user_groups: listnerPath('user_groups'),
       });
+
+      userRequests = payRequestListnerPath(userId).onSnapshot(
+        getNewPayRequests.bind(this, false),
+      );
+
+      userSelfRequests = selfPayRequestListnerPath(userId).onSnapshot(
+        getNewPayRequests.bind(this, true),
+      );
     }
 
     return () => {
@@ -296,6 +328,13 @@ export const FirebaseListner = () => {
       if (groupListner) {
         groupListner();
       }
+
+      if (userRequests) {
+        userRequests();
+      }
+      if (userSelfRequests) {
+        userSelfRequests();
+      }
     };
   }, [user?.userProfile]);
 
@@ -314,31 +353,6 @@ export const FirebaseListner = () => {
       }
     };
   }, [userGroups]);
-
-  useEffect(() => {
-    let userRequests: () => void;
-    let userSelfRequests: () => void;
-
-    if (user?.userProfile?.uid) {
-      userRequests = payRequestListnerPath(user?.userProfile?.uid).onSnapshot(
-        getNewPayRequests.bind(this, false),
-      );
-
-      userSelfRequests = selfPayRequestListnerPath(
-        user?.userProfile?.uid,
-      ).onSnapshot(getNewPayRequests.bind(this, true));
-    } else {
-      setRequests([]);
-    }
-    return () => {
-      if (userRequests) {
-        userRequests();
-      }
-      if (userSelfRequests) {
-        userSelfRequests();
-      }
-    };
-  }, [user?.userProfile]);
 
   return null;
 };
