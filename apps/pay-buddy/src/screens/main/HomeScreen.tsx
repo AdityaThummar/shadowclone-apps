@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import {
   BaseText,
+  Chip,
   NoData,
   PayRequestCard,
   // Card,
@@ -26,11 +27,12 @@ import {
   // SectionListRenderItem,
   View,
 } from 'react-native';
-import { commonStyles } from '@styles';
+import { commonStyles, hp, wp } from '@styles';
 import { useNav } from '../../helper';
 import { RequestState } from '../../zustand/RequestState';
 import { PayRequestItemType } from '../../api/payRequests';
 import { AuthState } from '../../zustand';
+import { onPressSummary } from './ChatListScreen';
 
 export const showInProgress = () => {
   Alert.alert(
@@ -61,32 +63,6 @@ export const HomeScreen = () => {
   const styles = s();
 
   const [selectedTab, setSelectedTab] = useState<TabItemType>(Tabs[0]);
-
-  // const renderPayCard: SectionListRenderItem<
-  //   string,
-  //   { title: string; data: string }
-  // > = useCallback(() => {
-  //   return (
-  //     <PayRequestCard
-  //       // data={item}
-  //       isOwn={selectedTab.name === Tabs[2].name}
-  //       isPaid={selectedTab.name === Tabs[1].name}
-  //     />
-  //   );
-  // }, [selectedTab, styles]);
-
-  // const renderSectionHeader: (props: {
-  //   section: SectionListData<string, SectionType>;
-  // }) => React.ReactElement = useCallback(
-  //   (props: { section: SectionListData<string, SectionType> }) => {
-  //     return (
-  //       <BaseText bold sizeMedium style={[styles.sectionHeader]}>
-  //         {props.section.title}
-  //       </BaseText>
-  //     );
-  //   },
-  //   [styles],
-  // );
 
   const goToAddNew = () => {
     navigate('AddEditRequestScreen');
@@ -142,6 +118,52 @@ export const HomeScreen = () => {
     }
   }, [requests, selfRequests, selectedTab, user?.userProfile]);
 
+  const remainingAmounts = useMemo(() => {
+    let totalIncome = 0;
+    let totalOut = 0;
+    if (user?.userProfile?.uid?.toString()) {
+      allRequests?.map((_req) => {
+        let totalRemainingForRequest = 0;
+        if (_req?.created_by?.uid === user?.userProfile?.uid) {
+          if (_req.members) {
+            _req.members?.map((_reqMem) => {
+              const isPaid =
+                _req?.paidMembers &&
+                _req?.paidMembers?.findIndex(
+                  (_pm) => _pm?.uid === _reqMem?.uid,
+                ) !== -1;
+
+              if (!isPaid) {
+                const difAmount = _req?.diffAmounts?.[_reqMem?.uid];
+                if (difAmount) {
+                  totalRemainingForRequest += Number(difAmount ?? 0);
+                } else {
+                  totalRemainingForRequest += Number(_req?.requestAmount ?? 0);
+                }
+              }
+            });
+          }
+          totalIncome += Number(totalRemainingForRequest ?? 0);
+        } else {
+          const isPaid =
+            _req?.paidMembers &&
+            _req?.paidMembers?.findIndex(
+              (_pm) => _pm?.uid === user?.userProfile?.uid,
+            ) !== -1;
+          const needToPay = user?.userProfile?.uid
+            ? _req?.diffAmounts?.[user.userProfile.uid?.toString()] ??
+              _req?.requestAmount
+            : 0;
+
+          if (!isPaid) {
+            totalOut += Number(needToPay ?? 0);
+          }
+        }
+      });
+    }
+    return { totalIncome, totalOut };
+  }, [allRequests, user?.userProfile]);
+
   return (
     <ScreenWrapper style={[{ margin: 0, backgroundColor: colors.primary }]}>
       <View style={[commonStyles.rowItemsCenter, styles.topContainer]}>
@@ -162,6 +184,66 @@ export const HomeScreen = () => {
         ) : (
           <View style={[commonStyles.flex, commonStyles.centerCenter]}>
             <NoData />
+          </View>
+        )}
+        {(!!remainingAmounts?.totalIncome || !!remainingAmounts?.totalOut) && (
+          <View
+            style={[
+              commonStyles.rowItemCenterJustifyCenter,
+              commonStyles.center,
+              {
+                marginTop: hp(1),
+                gap: wp(3),
+                maxWidth: wp(90),
+                flexWrap: 'wrap',
+              },
+            ]}
+          >
+            <BaseText sizeSmall semibold>
+              Pending amounts:
+            </BaseText>
+            {!!remainingAmounts?.totalIncome && (
+              <Chip
+                title={`₹ ${remainingAmounts?.totalIncome}`}
+                titleProps={{
+                  sizeMedium: true,
+                  sizeTiny: false,
+                }}
+                icon='arrow-down'
+                iconProps={{
+                  iconStyle: {
+                    color: colors.success,
+                  },
+                }}
+                onPress={onPressSummary.bind(
+                  this,
+                  'income',
+                  remainingAmounts,
+                  false,
+                )}
+              />
+            )}
+            {!!remainingAmounts?.totalOut && (
+              <Chip
+                title={`₹ ${remainingAmounts?.totalOut}`}
+                titleProps={{
+                  sizeMedium: true,
+                  sizeTiny: false,
+                }}
+                icon='arrow-up'
+                iconProps={{
+                  iconStyle: {
+                    color: colors.error,
+                  },
+                }}
+                onPress={onPressSummary.bind(
+                  this,
+                  'expense',
+                  remainingAmounts,
+                  false,
+                )}
+              />
+            )}
           </View>
         )}
       </ScreenWrapper>

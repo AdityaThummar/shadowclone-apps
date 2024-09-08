@@ -23,6 +23,23 @@ import { SelectionState } from '../../zustand/SelectionState';
 import { getGroupDetails } from '../../api/groups';
 import { GroupDetailsType } from '../../api/types';
 
+export const onPressSummary = (
+  type: 'income' | 'expense' = 'income',
+  remainingAmounts: { totalIncome?: number; totalOut?: number } = {},
+  group: boolean = false,
+) => {
+  Alert.alert(
+    `Total pending ${type === 'income' ? 'Income' : 'Expense'}`,
+    type === 'income'
+      ? `Meaninig total ₹ ${
+          remainingAmounts?.totalIncome
+        } is pending from others${group ? ' in this group' : ''}`
+      : `Meaninig total ₹ ${
+          remainingAmounts?.totalOut
+        } is pending to pay to others${group ? ' in this group' : ''}`,
+  );
+};
+
 export const ChatListScreen = () => {
   const { params } = useRoute<RootRouteProps<'ChatListScreen'>>();
   const group = params?.group;
@@ -174,18 +191,6 @@ export const ChatListScreen = () => {
     navigate('AddEditRequestScreen');
   }, [group, groupDetails]);
 
-  const onPressSummary = useCallback(
-    (type: 'income' | 'expense' = 'income') => {
-      Alert.alert(
-        `Total pending ${type === 'income' ? 'Income' : 'Expense'}`,
-        type === 'income'
-          ? `Meaninig total ₹ ${remainingAmounts?.totalIncome} is pending from others in this group`
-          : `Meaninig total ₹ ${remainingAmounts?.totalIncome} is pending to pay to others in this group`,
-      );
-    },
-    [remainingAmounts],
-  );
-
   return (
     <ScreenWrapper>
       <Header
@@ -196,50 +201,66 @@ export const ChatListScreen = () => {
       <Scroll autoScrollBottom>
         <>{allRequests?.map(renderChatItem)}</>
       </Scroll>
-      <View
-        style={[
-          commonStyles.rowItemCenterJustifyCenter,
-          commonStyles.center,
-          {
-            marginTop: hp(1),
-            gap: wp(3),
-            maxWidth: wp(90),
-            flexWrap: 'wrap',
-          },
-        ]}
-      >
-        <BaseText sizeSmall semibold>
-          Pending amounts:
-        </BaseText>
-        <Chip
-          title={`₹ ${remainingAmounts?.totalIncome}`}
-          titleProps={{
-            sizeMedium: true,
-            sizeTiny: false,
-          }}
-          icon='arrow-down'
-          iconProps={{
-            iconStyle: {
-              color: colors.success,
+      {(!!remainingAmounts?.totalIncome || !!remainingAmounts?.totalOut) && (
+        <View
+          style={[
+            commonStyles.rowItemCenterJustifyCenter,
+            commonStyles.center,
+            {
+              marginTop: hp(1),
+              gap: wp(3),
+              maxWidth: wp(90),
+              flexWrap: 'wrap',
             },
-          }}
-          onPress={onPressSummary.bind(this, 'income')}
-        />
-        <Chip
-          title={`₹ ${remainingAmounts?.totalOut}`}
-          titleProps={{
-            sizeMedium: true,
-            sizeTiny: false,
-          }}
-          icon='arrow-up'
-          iconProps={{
-            iconStyle: {
-              color: colors.error,
-            },
-          }}
-          onPress={onPressSummary.bind(this, 'expense')}
-        />
-      </View>
+          ]}
+        >
+          <BaseText sizeSmall semibold>
+            Pending amounts:
+          </BaseText>
+          {!!remainingAmounts?.totalIncome && (
+            <Chip
+              title={`₹ ${remainingAmounts?.totalIncome}`}
+              titleProps={{
+                sizeMedium: true,
+                sizeTiny: false,
+              }}
+              icon='arrow-down'
+              iconProps={{
+                iconStyle: {
+                  color: colors.success,
+                },
+              }}
+              onPress={onPressSummary.bind(
+                this,
+                'income',
+                remainingAmounts,
+                true,
+              )}
+            />
+          )}
+          {!!remainingAmounts?.totalIncome && (
+            <Chip
+              title={`₹ ${remainingAmounts?.totalOut}`}
+              titleProps={{
+                sizeMedium: true,
+                sizeTiny: false,
+              }}
+              icon='arrow-up'
+              iconProps={{
+                iconStyle: {
+                  color: colors.error,
+                },
+              }}
+              onPress={onPressSummary.bind(
+                this,
+                'expense',
+                remainingAmounts,
+                true,
+              )}
+            />
+          )}
+        </View>
+      )}
       <PrimaryButton
         title='Create new request'
         style={{
