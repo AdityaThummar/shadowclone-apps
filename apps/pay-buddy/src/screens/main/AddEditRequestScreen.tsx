@@ -27,12 +27,13 @@ import {
   updateRequest,
 } from '../../api/payRequests';
 import { LoadingState } from '@zustand';
-import { useRoute } from '@react-navigation/native';
+import { useIsFocused, useRoute } from '@react-navigation/native';
 import { RequestState } from '../../zustand/RequestState';
 
 export const AddEditRequestScreen = () => {
   const { navigate, goBack, push } = useNav();
   const { params } = useRoute<RootRouteProps<'AddEditRequestScreen'>>();
+  const isFocused = useIsFocused();
   const viewOnly = !!params?.viewOnly;
   const edit = !!params?.edit;
 
@@ -303,7 +304,7 @@ export const AddEditRequestScreen = () => {
   );
 
   useEffect(() => {
-    if (params?.id) {
+    if (params?.id && isFocused) {
       const data = [...requests, ...selfRequests]?.find(
         (_re) => _re.id === params.id,
       );
@@ -318,11 +319,14 @@ export const AddEditRequestScreen = () => {
       }
       setPayRequestItem(data);
     }
+  }, [params?.id, requests, selfRequests, isFocused]);
+
+  useEffect(() => {
     return () => {
-      // setSelectedMemebersForNew([]);
-      // setSelectedGroups([]);
+      setSelectedMemebersForNew([]);
+      setSelectedGroups([]);
     };
-  }, [params?.id, requests, selfRequests]);
+  }, []);
 
   const Spacer = <View style={{ height: hp(1) }} />;
 
